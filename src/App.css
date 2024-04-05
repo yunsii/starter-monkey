@@ -3,7 +3,7 @@
 }
 
 body {
-  @apply flex;
+  @apply flex items-center;
 }
 
 .logo {
