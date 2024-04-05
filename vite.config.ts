@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import monkey, { cdn } from 'vite-plugin-monkey'
+import unoCSS from 'unocss/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    unoCSS(),
     react(),
     monkey({
       entry: 'src/main.tsx',
