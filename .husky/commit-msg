@@ -1,0 +1,2 @@
+npx --no -- commitlint --edit $1
+npx --no -- @jannajs/lint emojify $1
