@@ -1,42 +1,39 @@
-import { useState } from 'react'
+import { unindent } from '@antfu/utils'
+import { useEffect, useRef, useState } from 'react'
 
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { getUserscripts } from './helpers/scripts'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const loadedModulesRef = useRef<{ key: string, ReactUserscript: ReactUserscript, matched: boolean }[]>([])
 
-  return (
-    <div className='App'>
-      <div>
-        <a href='https://vitejs.dev' target='_blank' rel='noreferrer'>
-          <img src={viteLogo} className='logo' alt='Vite logo' />
-        </a>
-        <a href='https://reactjs.org' target='_blank' rel='noreferrer'>
-          <img src={reactLogo} className='logo react' alt='React logo' />
-        </a>
-      </div>
-      <h1 className='italic'>Vite + React</h1>
-      <div className='card'>
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is
-          {' '}
-          {count}
-        </button>
-        <p>
-          Edit
-          {' '}
-          <code>src/App.tsx</code>
-          {' '}
-          and save to test HMR
-        </p>
-      </div>
-      <p className='read-the-docs'>
-        Click on the Vite and React logos to learn more
-      </p>
-    </div>
-  )
+  useEffect(() => {
+    getUserscripts().then((userscripts) => {
+      // https://en.wikipedia.org/wiki/Box-drawing_characters
+      const printInfo = unindent(`
+        ┌──── 🦄 starter-monkey (${userscripts.filter((item) => item.matched).length}/${userscripts.length}) ────┄
+        ${userscripts.map((item) => {
+            return `│ ${item.matched ? '🟢' : '🔴'} ${item.ReactUserscript.displayName}`
+          })}
+        └──────────────────────────────────┄
+      `)
+      // eslint-disable-next-line no-console
+      console.debug(printInfo)
+      loadedModulesRef.current = userscripts
+      setLoading(true)
+    })
+  }, [])
+
+  if (!loading) {
+    return null
+  }
+
+  return loadedModulesRef.current.filter((item) => {
+    return item.matched
+  }).map((item) => {
+    const { ReactUserscript } = item
+    return <ReactUserscript key={item.key} />
+  })
 }
 
 export default App

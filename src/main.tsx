@@ -1,13 +1,14 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import 'virtual:uno.css'
 
 import App from './App'
+
+import 'virtual:uno.css'
 
 ReactDOM.createRoot(
   (() => {
     const app = document.createElement('div')
-    app.id = 'root'
+    app.id = 'starter-monkey-root'
     document.body.append(app)
     return app
   })(),

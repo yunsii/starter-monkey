@@ -1,8 +1,10 @@
 {
   "css.lint.unknownAtRules": "ignore",
-  "eslint.experimental.useFlatConfig": true,
   "prettier.enable": false,
   "editor.formatOnSave": false,
+  "eslint.options": {
+    "flags": ["unstable_ts_config"]
+  },
 
   // Auto fix
   "editor.codeActionsOnSave": {
@@ -24,10 +26,12 @@
     "yaml",
     "toml",
     "gql",
-    "graphql"
+    "graphql",
+    "svg"
   ],
   "cSpell.words": [
     "jsdelivr",
-    "userscript"
+    "userscript",
+    "Userscripts"
   ]
 }
