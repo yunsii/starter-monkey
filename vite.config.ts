@@ -21,6 +21,8 @@ export default defineConfig(async () => {
           icon: 'https://vitejs.dev/logo.svg',
           namespace: 'npm/vite-plugin-monkey',
           match,
+          grant: ['unsafeWindow'],
+          noframes: true,
         },
         build: {
           externalGlobals: {
