@@ -1,13 +1,11 @@
-import presetAttributify from '@unocss/preset-attributify'
 import presetIcons from '@unocss/preset-icons'
-import presetUno from '@unocss/preset-uno'
+import presetWind4 from '@unocss/preset-wind4'
 import transformerDirectives from '@unocss/transformer-directives'
 import { defineConfig } from 'unocss'
 
 export default defineConfig({
   presets: [
-    presetUno(),
-    presetAttributify(),
+    presetWind4(),
     presetIcons({
       extraProperties: {
         'display': 'inline-block',

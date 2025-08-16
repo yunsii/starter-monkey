@@ -1,5 +1,5 @@
-declare interface ReactUserscript {
-  (): React.ReactNode
+declare interface Userscript {
+  (): import('type-fest').Promisable<void>
   displayName: string
   matches: string []
 }

@@ -2,6 +2,7 @@ import react from '@vitejs/plugin-react-swc'
 import unoCSS from 'unocss/vite'
 import { defineConfig } from 'vite'
 import monkey, { cdn } from 'vite-plugin-monkey'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 import { getAllMatches } from './scripts/all-matches'
 
@@ -13,10 +14,11 @@ export default defineConfig(async () => {
 
   return {
     plugins: [
-      unoCSS(),
+      tsconfigPaths(),
       react(),
+      unoCSS(),
       monkey({
-        entry: 'src/main.tsx',
+        entry: 'src/main.ts',
         userscript: {
           icon: 'https://vitejs.dev/logo.svg',
           namespace: 'npm/vite-plugin-monkey',
@@ -31,7 +33,6 @@ export default defineConfig(async () => {
               'ReactDOM',
               'umd/react-dom.production.min.js',
             ),
-            'lodash': ['_', 'https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js'],
           },
         },
       }),
