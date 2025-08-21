@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
 import autoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
-import monkey, { cdn } from 'vite-plugin-monkey'
+import monkey, { cdn, util } from 'vite-plugin-monkey'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 import { getScriptInfos, printScriptInfos } from './scripts/script-infos'
@@ -20,6 +20,7 @@ export default defineConfig(async () => {
       autoImport({
         imports: [
           'react',
+          util.unimportPreset,
           {
             'tagged-classnames-free': ['cls', 'tw'],
           },
