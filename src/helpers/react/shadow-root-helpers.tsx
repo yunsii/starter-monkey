@@ -1,7 +1,8 @@
-import InlineUnoCss from '@/components/inline-uno-css'
 import React from 'react'
 import { createPortal } from 'react-dom'
 import ReactDOM from 'react-dom/client'
+
+import InlineTailwindCSS from '@/components/inline-tailwindcss'
 
 export function reactRenderInShadowRoot(container: HTMLElement, shadowRoot: ShadowRoot, dynamicApp: () => Promise<{ default: React.ComponentType }>) {
   const DynamicApp = React.lazy(dynamicApp)
@@ -17,7 +18,7 @@ export function reactRenderInShadowRoot(container: HTMLElement, shadowRoot: Shad
     return
   }
 
-  const portal = createPortal(<InlineUnoCss />, targetHead)
+  const portal = createPortal(<InlineTailwindCSS />, targetHead)
 
   root.render(
     <React.StrictMode>

@@ -1,5 +1,5 @@
+import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
-import unoCSS from 'unocss/vite'
 import { defineConfig } from 'vite'
 import monkey, { cdn } from 'vite-plugin-monkey'
 import tsconfigPaths from 'vite-tsconfig-paths'
@@ -9,14 +9,14 @@ import { getAllMatches } from './scripts/all-matches'
 // https://vitejs.dev/config/
 export default defineConfig(async () => {
   const match = await getAllMatches()
-  // eslint-disable-next-line no-console
+
   console.log(`👀 all userscript match:\n${match.map((item) => `- ${item}`).join('\n')}`)
 
   return {
     plugins: [
       tsconfigPaths(),
       react(),
-      unoCSS(),
+      tailwindcss(),
       monkey({
         entry: 'src/main.ts',
         userscript: {
