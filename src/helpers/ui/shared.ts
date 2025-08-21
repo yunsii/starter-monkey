@@ -1,9 +1,10 @@
-import { logger } from '@/helpers/logger'
 import { waitElement } from '@1natsu/wait-element'
 import {
   isExist as mountDetector,
   isNotExist as removeDetector,
 } from '@1natsu/wait-element/detectors'
+
+import { logger } from '@/helpers/logger'
 
 import type {
   AutoMount,

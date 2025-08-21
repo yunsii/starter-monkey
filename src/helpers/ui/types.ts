@@ -2,8 +2,8 @@ export interface ContentScriptUi<TMounted> extends MountFunctions {
   mounted: TMounted | undefined
 }
 
-export type ContentScriptUiOptions<TMounted> = ContentScriptPositioningOptions &
-  ContentScriptAnchoredOptions & {
+export type ContentScriptUiOptions<TMounted> = ContentScriptPositioningOptions
+  & ContentScriptAnchoredOptions & {
     /**
      * Callback called before the UI is removed from the webpage. Use to cleanup your UI, like
      * unmounting your Vue or React apps.
@@ -14,22 +14,22 @@ export type ContentScriptUiOptions<TMounted> = ContentScriptPositioningOptions &
     onRemove?: (mounted: TMounted | undefined) => void
   }
 
-export type ContentScriptOverlayAlignment =
-  | 'top-left'
-  | 'top-right'
-  | 'bottom-left'
-  | 'bottom-right'
+export type ContentScriptOverlayAlignment
+  = | 'top-left'
+    | 'top-right'
+    | 'bottom-left'
+    | 'bottom-right'
 
 /**
  * ![Visualization of different append modes](https://wxt.dev/content-script-ui-append.png)
  */
-export type ContentScriptAppendMode =
-  | 'last'
-  | 'first'
-  | 'replace'
-  | 'before'
-  | 'after'
-  | ((anchor: Element, ui: Element) => void)
+export type ContentScriptAppendMode
+  = | 'last'
+    | 'first'
+    | 'replace'
+    | 'before'
+    | 'after'
+    | ((anchor: Element, ui: Element) => void)
 
 export interface ContentScriptInlinePositioningOptions {
   position: 'inline'
@@ -67,10 +67,10 @@ export interface ContentScriptModalPositioningOptions {
  *
  * ![Visualization of different types](https://wxt.dev/content-script-ui-position.png)
  */
-export type ContentScriptPositioningOptions =
-  | ContentScriptInlinePositioningOptions
-  | ContentScriptOverlayPositioningOptions
-  | ContentScriptModalPositioningOptions
+export type ContentScriptPositioningOptions
+  = | ContentScriptInlinePositioningOptions
+    | ContentScriptOverlayPositioningOptions
+    | ContentScriptModalPositioningOptions
 
 export interface ContentScriptAnchoredOptions {
   /**

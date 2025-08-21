@@ -3,9 +3,6 @@
   "prettier.enable": false,
   "editor.formatOnSave": false,
   "eslint.format.enable": true,
-  "eslint.options": {
-    "flags": ["unstable_ts_config"]
-  },
 
   // Auto fix
   "editor.codeActionsOnSave": {
@@ -37,5 +34,11 @@
     "userscript",
     "Userscripts",
     "webext"
+  ],
+  "tailwindCSS.experimental.classRegex": [
+    ["tw`((?:\\S|\\s)*?)`", "'([^']+)'"],
+    "tw`((\\S|\\s)*?)`",
+    ["cls`((?:\\S|\\s)*?)`", "'([^']+)'"],
+    "cls`((\\S|\\s)*?)`"
   ]
 }

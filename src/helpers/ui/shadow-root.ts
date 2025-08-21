@@ -115,8 +115,8 @@ export interface ShadowRootContentScriptUi<TMounted>
   shadow: ShadowRoot
 }
 
-export type ShadowRootContentScriptUiOptions<TMounted> =
-  ContentScriptUiOptions<TMounted> & {
+export type ShadowRootContentScriptUiOptions<TMounted>
+  = ContentScriptUiOptions<TMounted> & {
     /**
      * The name of the custom component used to host the ShadowRoot. Must be kebab-case.
      */

@@ -46,8 +46,8 @@ export interface IntegratedContentScriptUi<TMounted>
   wrapper: HTMLElement
 }
 
-export type IntegratedContentScriptUiOptions<TMounted> =
-  ContentScriptUiOptions<TMounted> & {
+export type IntegratedContentScriptUiOptions<TMounted>
+  = ContentScriptUiOptions<TMounted> & {
     /**
      * Tag used to create the wrapper element.
      *
