@@ -5,13 +5,14 @@ import { defineConfig } from 'vite'
 import monkey, { cdn } from 'vite-plugin-monkey'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
-import { getAllMatches } from './scripts/all-matches'
+import { getScriptInfos, printScriptInfos } from './scripts/script-infos'
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => {
-  const match = await getAllMatches()
+  const scriptInfos = await getScriptInfos()
+  const allMatches = scriptInfos.flatMap((script) => script.matches)
 
-  console.log(`👀 all userscript match:\n${match.map((item) => `- ${item}`).join('\n')}`)
+  printScriptInfos(scriptInfos)
 
   return {
     plugins: [
@@ -31,7 +32,7 @@ export default defineConfig(async () => {
         userscript: {
           icon: 'https://vitejs.dev/logo.svg',
           namespace: 'npm/vite-plugin-monkey',
-          match,
+          match: allMatches,
           grant: ['unsafeWindow'],
           noframes: true,
         },
