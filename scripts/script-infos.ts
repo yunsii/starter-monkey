@@ -53,9 +53,9 @@ function parseScriptInfo(sourceCode: string): ScriptInfo {
 }
 
 export async function getScriptInfos(): Promise<ScriptInfo[]> {
-  const reactUserscriptPaths = await glob('src/scripts/*/index.tsx')
+  const reactUserscriptPaths = await glob('src/scripts/*/*/index.tsx')
 
-  const result = await Promise.all(reactUserscriptPaths.map(async (item): Promise<ScriptInfo | null> => {
+  const result = await Promise.all(reactUserscriptPaths.map(async (item): Promise<ScriptInfo> => {
     const sourceCode = readFileSync(item, 'utf-8')
     return parseScriptInfo(sourceCode)
   }))

@@ -4,9 +4,9 @@ import { createShadowRootUi } from '@/helpers/ui/shadow-root'
 const Script: Userscript = async () => {
   const ui = await createShadowRootUi(
     {
-      name: 'v2ex-test',
+      name: 'google-demo',
       position: 'inline',
-      anchor: '#Rightbar table td:nth-child(3) span a',
+      anchor: 'body',
       onMount: (container, shadowRoot) => {
         return reactRenderInShadowRoot(container, shadowRoot, () => import('./App'))
       },
@@ -16,7 +16,7 @@ const Script: Userscript = async () => {
   ui.mount()
 }
 
-Script.displayName = 'v2ex-test'
-Script.matches = ['https://www.v2ex.com/']
+Script.displayName = 'google-demo'
+Script.matches = ['https://www.google.com/']
 
 export default Script

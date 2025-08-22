@@ -4,7 +4,7 @@ import { uniq } from 'es-toolkit'
 import { interopDefault } from './modules'
 
 export async function getUserscripts() {
-  const modules = import.meta.glob<Userscript>('../scripts/*/index.tsx')
+  const modules = import.meta.glob<Userscript>('../scripts/*/*/index.tsx')
   const userscripts = await Promise.all(Object.values(modules).map((item) => item()))
   return userscripts.map((UserscriptItem, index) => {
     const userscript = interopDefault(UserscriptItem)
