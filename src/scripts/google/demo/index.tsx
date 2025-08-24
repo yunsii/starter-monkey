@@ -7,8 +7,11 @@ const Script: Userscript = async () => {
       name: 'google-demo',
       position: 'inline',
       anchor: 'body',
-      onMount: (container, shadowRoot) => {
-        return reactRenderInShadowRoot(container, shadowRoot, () => import('./App'))
+      onMount: (container, shadowRoot, shadowHost) => {
+        return reactRenderInShadowRoot(
+          { uiContainer: container, shadow: shadowRoot, shadowHost },
+          () => import('./app'),
+        )
       },
     },
   )

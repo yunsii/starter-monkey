@@ -35,11 +35,14 @@ declare global {
   const GM_webRequest: typeof import('vite-plugin-monkey/dist/client')['GM_webRequest']
   const GM_xmlhttpRequest: typeof import('vite-plugin-monkey/dist/client')['GM_xmlhttpRequest']
   const cls: typeof import('tagged-classnames-free')['cls']
+  const createIntegratedUi: typeof import('@/helpers/ui/integrated')['createIntegratedUi']
   const createRef: typeof import('react')['createRef']
+  const createShadowRootUi: typeof import('@/helpers/ui/shadow-root')['createShadowRootUi']
   const forwardRef: typeof import('react')['forwardRef']
   const lazy: typeof import('react')['lazy']
   const memo: typeof import('react')['memo']
   const monkeyWindow: typeof import('vite-plugin-monkey/dist/client')['monkeyWindow']
+  const reactRenderInShadowRoot: typeof import('@/helpers/react/shadow-root-helpers')['reactRenderInShadowRoot']
   const startTransition: typeof import('react')['startTransition']
   const tw: typeof import('tagged-classnames-free')['tw']
   const unsafeWindow: typeof import('vite-plugin-monkey/dist/client')['unsafeWindow']
@@ -58,4 +61,10 @@ declare global {
   const useState: typeof import('react')['useState']
   const useSyncExternalStore: typeof import('react')['useSyncExternalStore']
   const useTransition: typeof import('react')['useTransition']
+}
+// for type re-export
+declare global {
+  // @ts-ignore
+  export type { ShadowRootUi } from '@/helpers/ui/shadow-root.ts'
+  import('@/helpers/ui/shadow-root.ts')
 }

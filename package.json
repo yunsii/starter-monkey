@@ -17,11 +17,13 @@
   },
   "dependencies": {
     "@1natsu/wait-element": "^4.1.2",
+    "@monaco-editor/react": "^4.7.0",
     "@webext-core/isolated-element": "^1.1.2",
     "browser-extension-url-match": "^1.2.0",
     "es-toolkit": "^1.39.10",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-dx": "^1.1.1",
     "tagged-classnames-free": "^0.1.1"
   },
   "devDependencies": {

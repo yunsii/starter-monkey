@@ -5,6 +5,8 @@ import { splitShadowRootCss } from './split-shadow-root-css'
 
 import type { ContentScriptUi, ContentScriptUiOptions } from './types'
 
+export type ShadowRootUi<TMounted = unknown> = Awaited<ReturnType<typeof createShadowRootUi<TMounted>>>
+
 export async function createShadowRootUi<TMounted>(
   options: ShadowRootContentScriptUiOptions<TMounted>,
 ): Promise<ShadowRootContentScriptUi<TMounted>> {

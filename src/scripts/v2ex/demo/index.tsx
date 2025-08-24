@@ -6,9 +6,11 @@ const Script: Userscript = async () => {
     {
       name: 'v2ex-demo',
       position: 'inline',
-      anchor: '#Rightbar table td:nth-child(3) span a',
-      onMount: (container, shadowRoot) => {
-        return reactRenderInShadowRoot(container, shadowRoot, () => import('./App'))
+      onMount: (container, shadowRoot, shadowHost) => {
+        return reactRenderInShadowRoot(
+          { uiContainer: container, shadow: shadowRoot, shadowHost },
+          () => import('./app'),
+        )
       },
     },
   )
