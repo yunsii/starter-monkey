@@ -11,7 +11,7 @@ export function useCreateUis(
   const versionMap = useRef(new WeakMap<Element, number>())
 
   useElementsMutationObserver<Element>(selectors, {
-    onMount: async (element) => {
+    onMount: (element) => {
       // helpers with clearer names
       const removeUiSafe = (ui?: UiLike) => {
         if (!ui) {
@@ -40,23 +40,23 @@ export function useCreateUis(
       versionMap.current.set(element, currentVersion)
 
       // 2) start creation (allow concurrent creates). When done, only the latest version is kept
-      const createdUi = await createFn(element)
+      createFn(element).then((createdUi) => {
+        const latestVersion = versionMap.current.get(element) ?? 0
+        if (latestVersion !== currentVersion) {
+          // stale ui instance, remove and exit
+          removeUiSafe(createdUi)
+          return
+        }
 
-      const latestVersion = versionMap.current.get(element) ?? 0
-      if (latestVersion !== currentVersion) {
-        // stale ui instance, remove and exit
-        removeUiSafe(createdUi)
-        return
-      }
+        // 3) we're the latest: replace previous instance and mount
+        const previousUi = uiMap.current.get(element)
+        if (previousUi && previousUi !== createdUi) {
+          removeUiSafe(previousUi)
+        }
 
-      // 3) we're the latest: replace previous instance and mount
-      const previousUi = uiMap.current.get(element)
-      if (previousUi && previousUi !== createdUi) {
-        removeUiSafe(previousUi)
-      }
-
-      uiMap.current.set(element, createdUi)
-      mountUiSafe(createdUi)
+        uiMap.current.set(element, createdUi)
+        mountUiSafe(createdUi)
+      })
     },
   })
 
