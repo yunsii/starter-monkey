@@ -13,7 +13,9 @@
     "build": "vite build",
     "prepare": "husky",
     "lint": "eslint .",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix .",
+    "typecheck": "tsc --noEmit",
+    "release": "bumpp"
   },
   "dependencies": {
     "@1natsu/wait-element": "^4.1.2",
@@ -40,6 +42,7 @@
     "@types/react": "^18.3.23",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react-swc": "^4.0.1",
+    "bumpp": "^10.2.3",
     "eslint": "^9.36.0",
     "eslint-plugin-better-tailwindcss": "^3.7.5",
     "eslint-plugin-format": "^1.0.1",
