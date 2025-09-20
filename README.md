@@ -1,6 +1,11 @@
 # Starter Monkey
 
-[![repo:github](https://img.shields.io/badge/repo-github-0EA5E9)](https://github.com/yunsii/starter-monkey) [![version](https://img.shields.io/github/v/release/yunsii/starter-monkey?label=version&sort=semver&color=0EA5E9)](https://github.com/yunsii/starter-monkey/releases/latest) [![license](https://img.shields.io/github/license/yunsii/starter-monkey?color=0EA5E9)](https://github.com/yunsii/starter-monkey/blob/master/LICENSE)
+[![repo:github](https://img.shields.io/badge/repo-github-0EA5E9)](https://github.com/yunsii/starter-monkey) [![version](https://img.shields.io/github/v/release/yunsii/starter-monkey?label=version&sort=semver&color=0EA5E9)](https://github.com/yunsii/starter-monkey/releases/latest) [![license](https://img.shields.io/github/license/yunsii/starter-monkey?color=0EA5E9)](https://github.com/yunsii/starter-monkey/blob/master/LICENSE) [![greasyfork](https://img.shields.io/badge/greasyfork-install-0EA5E9)](https://greasyfork.org/scripts/550158-starter-monkey)
+
+## Install
+
+Install on Greasy Fork (click the badge above) or visit:
+https://greasyfork.org/scripts/550158-starter-monkey
 
 ## Features
 
