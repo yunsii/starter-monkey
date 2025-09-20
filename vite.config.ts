@@ -48,6 +48,7 @@ export default defineConfig(async () => {
           match: allMatches,
           grant: ['unsafeWindow'],
           noframes: true,
+          license: 'MIT',
         },
         build: {
           externalGlobals: {
