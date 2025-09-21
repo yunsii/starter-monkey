@@ -24,12 +24,13 @@ export default function App() {
           { uiContainer: container, shadow: shadowRoot, shadowHost },
           <button
             type='button'
-            className='font-bold text-red-400'
+            className='inline-flex items-center gap-1 font-bold text-red-400'
             onClick={() => {
               toggleEditorModal()
             }}
           >
             Editor
+            <span className='i-bx--bx-edit' />
           </button>,
         )
       },
