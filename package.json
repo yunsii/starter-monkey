@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "private": true,
   "packageManager": "pnpm@10.15.0",
+  "description": "Starter template for userscript engine like Tampermonkey and Violentmonkey, Greasemonkey, ScriptCat, powered by vite-plugin-monkey.",
   "imports": {
     "#tailwind-config.css": "./src/components/inline-tailwindcss/tailwind-config.css"
   },

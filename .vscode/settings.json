@@ -35,9 +35,11 @@
     "natsu",
     "preflights",
     "softprops",
+    "Tampermonkey",
     "unimport",
     "userscript",
     "Userscripts",
+    "Violentmonkey",
     "webext"
   ],
   "tailwindCSS.experimental.classRegex": [
