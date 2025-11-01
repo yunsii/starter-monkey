@@ -7,7 +7,7 @@ Starter template for userscript engine like Tampermonkey and Violentmonkey, Grea
 ## Install
 
 Install on Greasy Fork (click the badge above) or visit:
-https://greasyfork.org/scripts/550158-starter-monkey
+https://greasyfork.org/scripts/554420
 
 ## Features
 
