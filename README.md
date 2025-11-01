@@ -17,3 +17,9 @@ https://greasyfork.org/scripts/554420
 - 🔥 **Smart On-Demand Loading** - Keep pages squeaky clean, zero pollution guaranteed
 - 🎪 **Auto-Magical Pattern Matching** - Declare once, then sit back and relax - it handles everything
 - 📦 **Automated Releases** - GitHub Actions-powered automatic versioning and publishing
+
+## Projects Built with This Template
+
+The following userscript projects are built using the Starter Monkey template:
+
+- **[Bob Monkey](https://github.com/yunsii/bob-monkey)** - A userscript collection that enhances GitHub and DeepWiki user experience, featuring page visit history, question history assistant, and one-click GitHub to DeepWiki navigation

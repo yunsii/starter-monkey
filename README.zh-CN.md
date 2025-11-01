@@ -17,3 +17,9 @@ https://greasyfork.org/scripts/550158-starter-monkey
 - 🔥 **按需智能加载** - 页面不会被污染，只有需要时才加载
 - 🎪 **自动匹配规则** - 只要声明一次，剩下的交给它就行
 - 📦 **自动发布** - 用 GitHub Actions 自动给版本打包和发布
+
+## 基于此模板的项目
+
+以下是使用 Starter Monkey 模板开发的用户脚本项目：
+
+- **[Bob Monkey](https://github.com/yunsii/bob-monkey)** - 增强 GitHub 和 DeepWiki 使用体验的用户脚本集合，提供页面访问历史记录、问题历史助手、GitHub 一键跳转 DeepWiki 等功能
