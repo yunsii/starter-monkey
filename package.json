@@ -1,7 +1,7 @@
 {
   "name": "starter-monkey",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@10.15.0",
   "description": "Starter template for userscript engine like Tampermonkey and Violentmonkey, Greasemonkey, ScriptCat, powered by vite-plugin-monkey.",
