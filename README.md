@@ -23,3 +23,7 @@ https://greasyfork.org/scripts/554420
 The following userscript projects are built using the Starter Monkey template:
 
 - **[Bob Monkey](https://github.com/yunsii/bob-monkey)** - A userscript collection that enhances GitHub and DeepWiki user experience, featuring page visit history, question history assistant, and one-click GitHub to DeepWiki navigation
+
+## FAQ
+
+- [Floating layer component styles are missing when integrating shadcn/ui](https://github.com/yunsii/starter-monkey/issues/1)

@@ -23,3 +23,7 @@ https://greasyfork.org/scripts/550158-starter-monkey
 以下是使用 Starter Monkey 模板开发的用户脚本项目：
 
 - **[Bob Monkey](https://github.com/yunsii/bob-monkey)** - 增强 GitHub 和 DeepWiki 使用体验的用户脚本集合，提供页面访问历史记录、问题历史助手、GitHub 一键跳转 DeepWiki 等功能
+
+## 常见问题
+
+- [集成 shadcn/ui 时浮层组件样式丢失](https://github.com/yunsii/starter-monkey/issues/1)
