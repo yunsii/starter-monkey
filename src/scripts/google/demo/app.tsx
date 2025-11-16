@@ -1,5 +1,14 @@
 import { useState } from 'react'
 
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
+
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 
@@ -52,6 +61,18 @@ export default function App() {
       <p className='text-gray-800'>
         Click on the Vite and React logos to learn more
       </p>
+      <Sheet>
+        <SheetTrigger>Open</SheetTrigger>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Are you absolutely sure?</SheetTitle>
+            <SheetDescription>
+              This action cannot be undone. This will permanently delete your account
+              and remove your data from our servers.
+            </SheetDescription>
+          </SheetHeader>
+        </SheetContent>
+      </Sheet>
     </div>
   )
 }
