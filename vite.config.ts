@@ -13,7 +13,18 @@ import { localesMeta } from './src/locales/meta'
 // https://vitejs.dev/config/
 export default defineConfig(async () => {
   const scriptInfos = await getScriptInfos()
-  const allMatches = scriptInfos.flatMap((script) => script.matches)
+  const allMatches = scriptInfos.flatMap((script) => {
+    if ('matches' in script) {
+      return script.matches
+    }
+    return []
+  })
+  const allIncludes = scriptInfos.flatMap((script) => {
+    if ('includes' in script) {
+      return script.includes
+    }
+    return []
+  })
 
   printScriptInfos(scriptInfos)
 
@@ -49,6 +60,7 @@ export default defineConfig(async () => {
           icon: 'https://vitejs.dev/logo.svg',
           namespace: 'yuns',
           match: allMatches,
+          include: allIncludes,
           grant: ['unsafeWindow'],
           noframes: true,
           license: 'MIT',
