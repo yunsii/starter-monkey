@@ -7,8 +7,8 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 
 import type { Plugin } from 'vite'
 
+import { localesMeta } from './config/locales/meta'
 import { getScriptInfos, printScriptInfos } from './scripts/script-infos'
-import { localesMeta } from './src/locales/meta'
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => {

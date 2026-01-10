@@ -3,12 +3,13 @@
     "composite": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
   },
   "include": [
     "vite.config.ts",
     "scripts/**/*.ts",
-    "./src/locales/**/*.ts",
+    "config/locales/**/*.ts",
     "./src/*.d.ts"
   ]
 }
