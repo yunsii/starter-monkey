@@ -40,6 +40,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*.user.js
+          make_latest: true
 
       - name: Create Changelog
         run: npx changelogithub
