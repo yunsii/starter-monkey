@@ -2,7 +2,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react-swc'
 import autoImport from 'unplugin-auto-import/vite'
 import { defineConfig } from 'vite'
-import monkey, { cdn, util } from 'vite-plugin-monkey'
+import monkey, { util } from 'vite-plugin-monkey'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 import type { Plugin } from 'vite'
@@ -67,11 +67,24 @@ export default defineConfig(async () => {
         },
         build: {
           externalGlobals: {
-            'react': cdn.jsdelivr('React', 'umd/react.production.min.js'),
-            'react-dom': cdn.jsdelivr(
+            'react': [
+              'React',
+              (version: string, name: string, importName: string) => {
+                return `https://cdn.jsdelivr.net/npm/react-umd@${version}/dist/react.umd.min.js`
+              },
+            ],
+            'react-dom': [
               'ReactDOM',
-              'umd/react-dom.production.min.js',
-            ),
+              (version: string, name: string, importName: string) => {
+                return `https://cdn.jsdelivr.net/npm/react-umd@${version}/dist/react-dom.umd.min.js`
+              },
+            ],
+            'react-dom/client': [
+              'ReactDOMClient',
+              (version: string, name: string, importName: string) => {
+                return `https://cdn.jsdelivr.net/npm/react-umd@${version}/dist/react-dom-client.umd.min.js`
+              },
+            ],
           },
         },
       }),
