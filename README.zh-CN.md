@@ -27,3 +27,4 @@ https://greasyfork.org/scripts/550158-starter-monkey
 ## 常见问题
 
 - [集成 shadcn/ui 时浮层组件样式丢失](https://github.com/yunsii/starter-monkey/issues/1)
+- [想要使用 Ant Design 组件库?](https://github.com/yunsii/bob-monkey/commit/aa4d1316e3a3031768cb82ba19dd579e6e9a20eb)

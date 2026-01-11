@@ -27,3 +27,4 @@ The following userscript projects are built using the Starter Monkey template:
 ## FAQ
 
 - [Floating layer component styles are missing when integrating shadcn/ui](https://github.com/yunsii/starter-monkey/issues/1)
+- [Want to use Ant Design component library?](https://github.com/yunsii/bob-monkey/commit/aa4d1316e3a3031768cb82ba19dd579e6e9a20eb)
