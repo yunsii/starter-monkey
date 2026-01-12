@@ -1,6 +1,6 @@
 import { GM_xmlhttpRequest } from '$'
 
-import { isMonkeyEnv } from './env'
+import { detectGmXHR } from './env'
 
 export function gmFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
   return new Promise((resolve, reject) => {
@@ -81,9 +81,9 @@ export function gmFetch(input: RequestInfo | URL, init?: RequestInit): Promise<R
 }
 
 export async function monkeyFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-  if (isMonkeyEnv()) {
+  if (detectGmXHR()) {
     return gmFetch(input, init)
   } else {
-    return monkeyFetch(input, init)
+    return fetch(input, init)
   }
 }

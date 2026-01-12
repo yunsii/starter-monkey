@@ -1,5 +1,9 @@
 import { GM_info, GM_xmlhttpRequest } from '$'
 
-export function isMonkeyEnv() {
-  return typeof GM_info !== 'undefined' && typeof GM_xmlhttpRequest !== 'undefined'
+export function detectIsMonkeyEnv() {
+  return typeof GM_info !== 'undefined'
+}
+
+export function detectGmXHR() {
+  return detectIsMonkeyEnv() && typeof GM_xmlhttpRequest !== 'undefined'
 }
