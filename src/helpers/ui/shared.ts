@@ -26,6 +26,18 @@ export function applyPosition(
     return
   }
 
+  // Detached: host out of flow, no positioning on inner content
+  if (options.position === 'detached') {
+    root.style.display = 'block'
+    root.style.position = 'fixed'
+    root.style.top = '0'
+    root.style.left = '0'
+    root.style.width = '0'
+    root.style.height = '0'
+    root.style.overflow = 'hidden'
+    return
+  }
+
   if (options.zIndex != null) {
     root.style.zIndex = String(options.zIndex)
   }

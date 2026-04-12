@@ -62,15 +62,22 @@ export interface ContentScriptModalPositioningOptions {
   zIndex?: number
 }
 
+export interface ContentScriptDetachedPositioningOptions {
+  position: 'detached'
+}
+
 /**
- * Choose between `"inline"`, `"overlay"`, or `"modal"` positions.
+ *  Choose between `"inline"`, `"overlay"`, `"modal"`, or `"detached"` positions.
  *
- * ![Visualization of different types](https://wxt.dev/content-script-ui-position.png)
+ * - `"detached"` — The shadow host is taken out of the document flow with zero dimensions.
+ *   No positioning is applied to the inner content. Use when your UI handles its own
+ *   positioning entirely (e.g. fixed buttons, modals, drawers).
  */
 export type ContentScriptPositioningOptions
   = | ContentScriptInlinePositioningOptions
     | ContentScriptOverlayPositioningOptions
     | ContentScriptModalPositioningOptions
+    | ContentScriptDetachedPositioningOptions
 
 export interface ContentScriptAnchoredOptions {
   /**
