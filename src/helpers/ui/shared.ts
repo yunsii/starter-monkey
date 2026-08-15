@@ -16,6 +16,16 @@ import type {
   MountFunctions,
 } from './types'
 
+/**
+ * `z-index` 的最大合法值，作为 `overlay` / `modal` / `detached` 宿主的默认值。
+ *
+ * 「宿主不写 z-index，交给内容自己写」是行不通的：`modal` / `detached` 的宿主是
+ * `position: fixed`，本身就会创建层叠上下文，内容里的 `z-index` 跨不出去；而宿主自己以
+ * `z-index: auto` 参与页面的绘制顺序，页面上任何 `z-index > 0` 的元素都能把整个 UI 盖住。
+ * 真正决定层级的只有宿主这一层，所以默认值必须落在这里。
+ */
+const DEFAULT_Z_INDEX = 2147483647
+
 export function applyPosition(
   root: HTMLElement,
   positionedElement: HTMLElement | undefined | null,
@@ -35,12 +45,11 @@ export function applyPosition(
     root.style.width = '0'
     root.style.height = '0'
     root.style.overflow = 'hidden'
+    root.style.zIndex = String(options.zIndex ?? DEFAULT_Z_INDEX)
     return
   }
 
-  if (options.zIndex != null) {
-    root.style.zIndex = String(options.zIndex)
-  }
+  root.style.zIndex = String(options.zIndex ?? DEFAULT_Z_INDEX)
 
   root.style.overflow = 'visible'
   root.style.position = 'relative'
