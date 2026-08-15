@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client'
 
 import InlineTailwindCSS from '@/components/inline-tailwindcss'
 import { MountContextProvider } from '@/contexts/mount-context'
+import { NAMESPACE } from '@/helpers/namespace'
 import type { ShadowRootContentScriptUiOptions } from '@/helpers/ui/shadow-root'
 
 // Extract the onMount function type from the existing shadow-root options type.
@@ -25,9 +26,16 @@ export function reactRenderInShadowRoot(
   const _app = typeof app === 'function' ? React.createElement(React.lazy(app)) : app
 
   const rootContext = document.createElement('div')
-  rootContext.id = 'starter-monkey-root'
+  rootContext.id = `${NAMESPACE}-root`
+  // React 树和弹层容器分开：组件库的弹层需要一个不受 React diff 影响的挂载点，
+  // 详见 `MountContext.popupContainer`
+  const reactRootContainer = document.createElement('div')
+  reactRootContainer.id = `${NAMESPACE}-react-root`
+  const popupContainer = document.createElement('div')
+  popupContainer.id = `${NAMESPACE}-popup-root`
+  rootContext.append(reactRootContainer, popupContainer)
   uiContainer.appendChild(rootContext)
-  const root = ReactDOM.createRoot(rootContext)
+  const root = ReactDOM.createRoot(reactRootContainer)
 
   const targetHead = shadow.querySelector('head')
 
@@ -41,7 +49,7 @@ export function reactRenderInShadowRoot(
   root.render(
     <React.StrictMode>
       {portal}
-      <MountContextProvider {...mountContext}>
+      <MountContextProvider {...mountContext} popupContainer={popupContainer}>
         {_app}
       </MountContextProvider>
     </React.StrictMode>,
