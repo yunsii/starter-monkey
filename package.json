@@ -17,6 +17,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
     "typecheck": "tsc --noEmit",
+    "test": "node --test",
+    "verify": "node scripts/tampermonkey-cdp.mjs",
     "release": "bumpp"
   },
   "dependencies": {
