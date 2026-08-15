@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 /* eslint-disable no-console */
 
+import { NAMESPACE } from './namespace'
+
 function print(method: (...args: any[]) => void, ...args: any[]) {
   if (import.meta.env.MODE === 'production') {
     return
@@ -8,14 +10,14 @@ function print(method: (...args: any[]) => void, ...args: any[]) {
 
   if (typeof args[0] === 'string') {
     const message = args.shift()
-    method(`[starter-monkey] ${message}`, ...args)
+    method(`[${NAMESPACE}] ${message}`, ...args)
   } else {
-    method('[starter-monkey]', ...args)
+    method(`[${NAMESPACE}]`, ...args)
   }
 }
 
 /**
- * Wrapper around `console` with a "[starter-monkey]" prefix
+ * Wrapper around `console` with a `[NAMESPACE]` prefix
  */
 export const logger = {
   debug: (...args: any[]) => print(console.debug, ...args),

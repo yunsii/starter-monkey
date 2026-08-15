@@ -1,3 +1,5 @@
+import { NAMESPACE } from '@/helpers/namespace'
+
 import { applyPosition, createMountFunctions, mountUi } from './shared'
 
 import type { ContentScriptUi, ContentScriptUiOptions } from './types'
@@ -6,7 +8,7 @@ export function createIntegratedUi<TMounted>(
   options: IntegratedContentScriptUiOptions<TMounted>,
 ): IntegratedContentScriptUi<TMounted> {
   const wrapper = document.createElement(options.tag || 'div')
-  wrapper.setAttribute('data-starter-monkey', '')
+  wrapper.setAttribute(`data-${NAMESPACE}`, '')
 
   let mounted: TMounted | undefined
   const mount = () => {
