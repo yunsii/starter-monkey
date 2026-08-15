@@ -1,5 +1,8 @@
 import { createIsolatedElement } from '@webext-core/isolated-element'
 
+import { NAMESPACE } from '@/helpers/namespace'
+
+import { acquireDocumentStyle } from './document-styles'
 import { applyPosition, createMountFunctions, mountUi } from './shared'
 import { splitShadowRootCss } from './split-shadow-root-css'
 
@@ -10,7 +13,6 @@ export type ShadowRootUi<TMounted = unknown> = Awaited<ReturnType<typeof createS
 export async function createShadowRootUi<TMounted>(
   options: ShadowRootContentScriptUiOptions<TMounted>,
 ): Promise<ShadowRootContentScriptUi<TMounted>> {
-  const instanceId = Math.random().toString(36).substring(2, 15)
   const css: string[] = []
 
   if (options.css) {
@@ -32,26 +34,20 @@ export async function createShadowRootUi<TMounted>(
     mode: options.mode ?? 'open',
     isolateEvents: options.isolateEvents,
   })
-  shadowHost.setAttribute('data-monkey-shadow-root', '')
+  shadowHost.setAttribute(`data-${NAMESPACE}-shadow-root`, '')
 
   let mounted: TMounted | undefined
+  let releaseDocumentCss: (() => void) | undefined
 
   const mount = () => {
     // Add shadow root element to DOM
     mountUi(shadowHost, options)
     applyPosition(shadowHost, shadow.querySelector('html'), options)
 
-    // Add document CSS
-    if (
-      documentCss
-      && !document.querySelector(
-        `style[data-monkey-shadow-root-document-styles="${instanceId}"]`,
-      )
-    ) {
-      const style = document.createElement('style')
-      style.textContent = documentCss
-      style.setAttribute('data-monkey-shadow-root-document-styles', instanceId);
-      (document.head ?? document.body).append(style)
+    // Add document CSS. Guarded because `mount` may be called again without an intervening
+    // `remove` (autoMount re-mounts on anchor changes), which would leak a reference each time.
+    if (documentCss && !releaseDocumentCss) {
+      releaseDocumentCss = acquireDocumentStyle(documentCss)
     }
 
     // Mount UI inside shadow root
@@ -65,11 +61,9 @@ export async function createShadowRootUi<TMounted>(
     // Detach shadow root from DOM
     shadowHost.remove()
 
-    // Remove document CSS
-    const documentStyle = document.querySelector(
-      `style[data-monkey-shadow-root-document-styles="${instanceId}"]`,
-    )
-    documentStyle?.remove()
+    // Release document CSS
+    releaseDocumentCss?.()
+    releaseDocumentCss = undefined
 
     // Remove children from uiContainer
     while (uiContainer.lastChild) {
