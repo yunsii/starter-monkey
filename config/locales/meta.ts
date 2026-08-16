@@ -1,4 +1,4 @@
-import { description } from '../../package.json'
+import { description } from '../../package.json' with { type: 'json' }
 
 const _localesMeta = {
   name: {

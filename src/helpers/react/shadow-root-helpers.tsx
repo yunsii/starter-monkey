@@ -1,3 +1,5 @@
+import { StyleProvider } from '@ant-design/cssinjs'
+import { ConfigProvider } from 'antd'
 import React from 'react'
 import { createPortal } from 'react-dom'
 import ReactDOM from 'react-dom/client'
@@ -50,7 +52,23 @@ export function reactRenderInShadowRoot(
     <React.StrictMode>
       {portal}
       <MountContextProvider {...mountContext} popupContainer={popupContainer}>
-        {_app}
+        {/*
+          antd 的样式注入到 shadow root 内，而不是 document —— 否则 shadow root 里
+          什么都拿不到。`layer` 把 antd 的样式放进 CSS layer，Tailwind 的工具类
+          因此天然覆盖 antd 默认样式，不用靠 `!important` 打架。
+        */}
+        <StyleProvider container={shadow} layer>
+          <ConfigProvider
+            // 弹层（Popover / Select / Tooltip）默认 portal 到 `document.body`，
+            // 出了 shadow root 就丢样式，必须指回 shadow 内的真实元素
+            getPopupContainer={() => popupContainer}
+            getTargetContainer={() => uiContainer}
+            // 比宿主的 2147483647 略低：弹层要盖住页面，但不该盖住自己的宿主容器
+            theme={{ token: { zIndexPopupBase: 2147483000 } }}
+          >
+            {_app}
+          </ConfigProvider>
+        </StyleProvider>
       </MountContextProvider>
     </React.StrictMode>,
   )
