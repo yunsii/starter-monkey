@@ -21,11 +21,11 @@ export function createContext<ContextValueType extends object | null>(
       Object.values(context),
     ) as ContextValueType
 
-    return <Context.Provider value={value}>{children}</Context.Provider>
+    return <Context value={value}>{children}</Context>
   }
 
   function useContext() {
-    const context = React.useContext(Context)
+    const context = React.use(Context)
     if (context) {
       return context
     }

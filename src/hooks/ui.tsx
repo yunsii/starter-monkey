@@ -1,5 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useElementsMutationObserver } from 'react-dx'
+
+import ShadowModal from '@/components/shadow-modal'
+import { createShadowModalStore } from '@/components/shadow-modal/store'
 
 interface UiLike { mount: () => void, remove: () => void }
 
@@ -70,64 +73,63 @@ export default useCreateUis
 
 export interface UseShadowModalOptions {
   name: string
-  /** default 999 */
+  /**
+   * 默认 `2147483647`，见 `ContentScriptDetachedPositioningOptions.zIndex`。
+   *
+   * 早先这里默认 999，在真实站点上是很容易被页面元素盖住的量级。
+   */
   zIndex?: number
   content: React.ReactNode
 }
 
 export function useShadowModal(options: UseShadowModalOptions) {
-  const { name, zIndex = 999, content } = options
+  const { name, zIndex, content } = options
 
-  const modalUi = useRef<ShadowRootUi | null>(null)
-  const openRef = useRef(false)
-
-  const toggleModal = () => {
-    openRef.current = !openRef.current
-    if (openRef.current) {
-      modalUi.current?.mount()
-    } else {
-      modalUi.current?.remove()
-    }
-  }
+  // 只创建一次。content 后续通过下面的 effect 推进 store，不参与 shadow UI 的重建条件——
+  // 调用方传的多半是内联 JSX，每次 render 都是新引用，放进依赖数组会导致整个 UI 反复重建
+  const [store] = useState(() => createShadowModalStore(content))
 
   useEffect(() => {
+    store.setState({ content })
+  }, [store, content])
+
+  useEffect(() => {
+    let disposed = false
+    let ui: ShadowRootUi<ReturnType<typeof reactRenderInShadowRoot>> | null = null
+
     createShadowRootUi({
       name,
-      position: 'modal',
+      // detached 而不是 modal：modal 会把宿主撑成 `fixed; inset: 0`，常驻挂载会吞掉整页点击，
+      // 所以旧实现只能靠 mount/remove 来开合——而 remove 并不会 unmount React root，
+      // 每开合一次就泄漏一棵 React 树。detached 的宿主是 0×0，可以一直挂着，开合交给 React 状态
+      position: 'detached',
       zIndex,
-      onMount: (container, shadowRoot, shadowHost) => {
-        shadowHost.style.display = 'block'
+      onMount: (uiContainer, shadow, shadowHost) => {
         return reactRenderInShadowRoot(
-          { uiContainer: container, shadow: shadowRoot, shadowHost },
-          <div
-            className={`
-              absolute inset-0 flex items-center justify-center backdrop-blur-lg
-            `}
-            onClick={() => {
-              toggleModal()
-            }}
-          >
-            <div
-              className='max-h-[80vh] min-h-20 w-130 max-w-[80vw]'
-              onClick={(event) => {
-                event.stopPropagation()
-              }}
-            >
-              {content}
-            </div>
-          </div>,
+          { uiContainer, shadow, shadowHost },
+          <ShadowModal store={store} />,
         )
       },
-    }).then((ui) => {
-      if (modalUi.current) {
-        modalUi.current.remove()
+      onRemove: (root) => root?.unmount(),
+    }).then((created) => {
+      // 创建是异步的，期间组件可能已经卸载
+      if (disposed) {
+        created.remove()
+        return
       }
-      modalUi.current = ui
-      if (openRef.current) {
-        ui.mount()
-      }
+      ui = created
+      created.mount()
     })
-  }, [name, zIndex, content])
+
+    return () => {
+      disposed = true
+      ui?.remove()
+    }
+  }, [name, zIndex, store])
+
+  const toggleModal = useCallback(() => {
+    store.setState({ open: !store.getSnapshot().open })
+  }, [store])
 
   return {
     toggleModal,
