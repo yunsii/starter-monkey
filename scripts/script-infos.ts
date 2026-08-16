@@ -13,6 +13,7 @@ function parseScriptInfo(sourceCode: string): UserscriptConfig {
     ts.ScriptKind.TSX,
   )
 
+  let id: string | null = null
   let displayName: string | null = null
   let matches: string[] = []
   let includes: (string | RegExp)[] = []
@@ -26,7 +27,9 @@ function parseScriptInfo(sourceCode: string): UserscriptConfig {
         && ts.isPropertyAccessExpression(left)
         && ts.isIdentifier(left.expression)
         && left.expression.text === 'Script') {
-        if (left.name.text === 'displayName' && ts.isStringLiteral(right)) {
+        if (left.name.text === 'id' && ts.isStringLiteral(right)) {
+          id = right.text
+        } else if (left.name.text === 'displayName' && ts.isStringLiteral(right)) {
           displayName = right.text
         } else if (left.name.text === 'includes' && ts.isArrayLiteralExpression(right)) {
           includes = right.elements.map((element) => {
@@ -53,15 +56,27 @@ function parseScriptInfo(sourceCode: string): UserscriptConfig {
 
   visit(sourceFile)
 
-  if (displayName && includes.length > 0) {
-    return { displayName, includes }
+  // `id` 是配置的存储命名空间，含 `.` 或 `@` 会破坏键结构，反解不回来时表现为
+  // 「配置改了不生效」，所以在构建期就拦下
+  if (id && !/^[\w-]+$/.test(id)) {
+    throw new Error(`Script.id 只能包含字母、数字、下划线和连字符，收到：${JSON.stringify(id)}`)
   }
 
-  if (displayName && matches.length > 0) {
-    return { displayName, matches }
+  if (id && displayName && includes.length > 0) {
+    return { id, displayName, includes }
   }
 
-  throw new Error(`UserscriptConfig not found in source code, displayName: ${displayName}, matches: ${JSON.stringify(matches)}, includes: ${JSON.stringify(includes)}`)
+  if (id && displayName && matches.length > 0) {
+    return { id, displayName, matches }
+  }
+
+  // 这些属性是构建期用 AST **静态解析**的（不执行代码），所以右值必须是字面量。
+  // 写成 `Script.id = SCRIPT_ID` 这样引用常量，解析到的就是 null —— 报错里点明这一点，
+  // 否则只看到「not found」会去怀疑是不是漏写了。
+  throw new Error(
+    `UserscriptConfig not found in source code, id: ${id}, displayName: ${displayName}, matches: ${JSON.stringify(matches)}, includes: ${JSON.stringify(includes)}\n`
+    + '提示：id / displayName / matches / includes 的右值必须是字面量，不能引用常量或表达式',
+  )
 }
 
 export async function getScriptInfos(): Promise<UserscriptConfig[]> {

@@ -19,6 +19,7 @@ const Script: Userscript = async () => {
   ui.mount()
 }
 
+Script.id = 'google-demo'
 Script.displayName = 'google-demo'
 Script.matches = ['https://www.google.com/']
 

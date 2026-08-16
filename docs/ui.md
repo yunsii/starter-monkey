@@ -59,6 +59,27 @@
 样式。`reactRenderInShadowRoot` 会在 React 树旁边准备一个空容器，通过 `useMountContext().popupContainer`
 取用，传给组件库对应的参数即可（antd `getPopupContainer`、Radix / shadcn 的 `container`……）。
 
+这个容器是 `position: fixed; top:0; left:0; width:0; height:0`，**不是默认的 static**。原因是弹层几乎都是
+绝对定位的，而 `detached` 宿主是 0×0 且 `overflow: hidden`：容器不定位的话，弹层的包含块就是宿主，
+像素会被整个裁掉。容器定成 fixed 之后自己脱离了宿主的裁剪，且固定在 (0,0)、尺寸为 0，
+弹层相对它的绝对坐标恰好就是视口坐标，和弹层库算出来的值一致。
+
+这不需要调用方或宿主页面做任何配合 —— 容器是框架自己创建的，样式也由框架设定。
+也不按 `position` 分支：实测只有 `detached` 会裁剪，而 fixed 容器对 `inline` 无害，所以统一这么设。
+
+| 宿主                               | 容器 `static` | 容器 `fixed` |
+| ---------------------------------- | ------------- | ------------ |
+| `inline`（static / overflow 可见） | 可见          | 可见         |
+| `detached`（fixed / hidden / 0×0） | **被裁掉**    | 可见         |
+
+⚠️ 但它有边界：`position: fixed` 在祖先建立了固定定位包含块（`transform` / `filter` /
+`backdrop-filter` / `will-change` / `contain`）时会失效 —— 弹层会被锚到那个祖先上并可能被它裁掉。
+实测给一个 `<td>` 祖先加上 `transform` 后，弹层从 (400,400) 跑到 (608,561) 并消失。
+
+推论：**在 `inline` / `overlay` 的 UI 里用组件库弹层是有风险的**，因为它们锚在页面深处，
+随时可能有个带 `transform` 的祖先。反倒是 `detached` 最安全 —— 它的 anchor 本来就要求留在
+`body` 上，不存在页面祖先。要在页面深处放带弹层的 UI，用 `detached` 承载弹层部分更稳。
+
 ## 怎么验证
 
 这一层的问题（被页面盖住、被裁剪掉、样式没进 shadow root）`pnpm build` 一个都发现不了，
@@ -66,4 +87,21 @@
 
 ```bash
 pnpm verify eval "v2ex.com" "getComputedStyle(document.querySelector('v2ex-demo-editor')).zIndex"
+```
+
+**查「看不见」必须用命中测试，不能用布局矩形。** 裁剪不改变布局几何：一个被 `overflow: hidden`
+裁没的弹层，`getBoundingClientRect()` 照样返回正常的位置和尺寸，`visibility` 是 `visible`、
+`opacity` 是 `1` —— 全都在说「一切正常」。用 `elementFromPoint` 打在它中心，命中的是它自己
+才算真的画出来了：
+
+```bash
+pnpm verify eval "v2ex.com" "
+  (() => {
+    const sr = document.querySelector('starter-monkey-settings').shadowRoot
+    const pop = sr.querySelector('.ant-color-picker-dropdown')
+    const r = pop.getBoundingClientRect()
+    const hit = sr.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+    return { 布局正常: r.width > 0, 真的可见: pop.contains(hit) }
+  })()
+"
 ```

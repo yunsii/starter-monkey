@@ -35,6 +35,12 @@ export function reactRenderInShadowRoot(
   reactRootContainer.id = `${NAMESPACE}-react-root`
   const popupContainer = document.createElement('div')
   popupContainer.id = `${NAMESPACE}-popup-root`
+  // `position: fixed` 而不是默认的 static：`detached` 的宿主是 0×0 且 `overflow: hidden`，
+  // 而组件库的弹层是绝对定位的 —— 容器不定位的话，弹层的包含块就是宿主，像素会被整个裁掉
+  // （布局矩形照样正常，所以只看 getBoundingClientRect 是发现不了的，要用命中测试）。
+  // 定成 fixed 之后容器自己脱离了宿主的裁剪，且它固定在 (0,0)、尺寸为 0，
+  // 弹层相对它的绝对坐标恰好就是视口坐标，和弹层库算出来的值一致。
+  popupContainer.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0'
   rootContext.append(reactRootContainer, popupContainer)
   uiContainer.appendChild(rootContext)
   const root = ReactDOM.createRoot(reactRootContainer)

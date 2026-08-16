@@ -12,9 +12,17 @@ export default janna({
   // 验证链路的脚本用 Node 内置的 `node:test`，不引入 vitest：这条链路要在应用构建
   // 挂掉时也能跑，多一个转译/测试框架就多一个会把自己搞坏的环节。模板本身也不想
   // 为一个纯逻辑断言背上一整套测试框架依赖。
-  files: ['scripts/**/*.test.mjs'],
+  files: ['**/*.test.mjs', '**/*.test.ts'],
   rules: {
     'test/no-import-node-test': 'off',
+  },
+}, {
+  // 脚本入口按约定同时导出 `default`（功能本体）和 `settings`（配置声明）——
+  // 后者必须是具名导出，配置面板才能在不执行功能的前提下读到它。两者都不是组件，
+  // fast refresh 那条规则的前提在这里不成立。
+  files: ['src/scripts/*/*/index.tsx'],
+  rules: {
+    'react-refresh/only-export-components': 'off',
   },
 }, {
   files: [`src/${GLOB_SRC}`],
