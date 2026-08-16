@@ -675,7 +675,12 @@ async function doctor() {
   }
 
   const dev = await fetch(DEV_SERVER_URL, { signal: AbortSignal.timeout(2000) }).catch(() => null)
-  lines.push(dev ? `✓ dev server 可达：${DEV_SERVER_URL}` : `- dev server 未启动：${DEV_SERVER_URL}（只用 install-build 的话不需要）`)
+  // 刻意不进 `hint`：hint 非空会让 doctor 以非零码退出，而在 CSP 受限的站点上不起
+  // dev server、直接走 install-build 是正当选择，不该判成前提缺失。但默认路径是
+  // dev server，所以措辞要指向它，而不是把两种模式说成中立的二选一。
+  lines.push(dev
+    ? `✓ dev server 可达：${DEV_SERVER_URL}`
+    : `- dev server 未启动：${DEV_SERVER_URL}（默认路径要先跑 pnpm dev；仅在宿主页 CSP 拦住本地模块加载时才改用 install-build）`)
 
   const bundle = findBundle()
   lines.push(bundle ? `✓ 构建产物：${bundle.replace(ROOT, '')}` : '- 还没有构建产物（install-build 会自己构建）')

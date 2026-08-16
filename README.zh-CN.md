@@ -4,6 +4,8 @@
 
 适用于 Tampermonkey、Violentmonkey、Greasemonkey、ScriptCat 等 userscript 引擎的起始模板，由 [vite-plugin-monkey](https://github.com/lisonge/vite-plugin-monkey) 强力驱动。
 
+> 在本仓库上工作的 agent：先读 [AGENTS.md](AGENTS.md)。
+
 ## 安装
 
 可以在 Greasy Fork 上直接安装（点上面的徽章），或者访问：

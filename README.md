@@ -4,6 +4,8 @@
 
 Starter template for userscript engine like Tampermonkey and Violentmonkey, Greasemonkey, ScriptCat, powered by [vite-plugin-monkey](https://github.com/lisonge/vite-plugin-monkey).
 
+> Agents working on this repo: read [AGENTS.md](AGENTS.md) first.
+
 ## Install
 
 Install on Greasy Fork (click the badge above) or visit:
