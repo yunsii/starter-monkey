@@ -23,6 +23,14 @@ export const ENTRY_TITLE_FIELD = 'entryTitle'
 export const DEFAULT_ENTRY_BACKGROUND = 'rgba(107, 114, 128, 0.14)'
 export const DEFAULT_ENTRY_BAR_COLOR = 'rgba(55, 65, 81, 0.65)'
 
+/**
+ * 打开配置的快捷键，`HotkeyCombo | null`。
+ *
+ * 和入口位置一样刻意**不进 schema**：它的输入是「按一次键」而不是「填一个值」，
+ * 由 `render` 逃生舱里的录制控件负责。
+ */
+export const OPEN_HOTKEY_FIELD = 'openHotkey'
+
 export const ENTRY_BACKGROUND_FIELD = 'entryBackground'
 export const ENTRY_BAR_COLOR_FIELD = 'entryBarColor'
 export const ENTRY_BAR_LENGTH_FIELD = 'entryBarLength'

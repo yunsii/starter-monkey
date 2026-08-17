@@ -4,6 +4,7 @@ import { getUserscripts } from './helpers/scripts'
 import { mountSettingsEntry } from './helpers/settings/entry'
 import { isFeatureEnabled } from './helpers/settings/feature-toggle'
 import { registerSettingsMenu } from './helpers/settings/menu'
+import { registerOpenHotkey } from './helpers/settings/open-hotkey'
 
 getUserscripts().then((userscripts) => {
   // 命中当前页面、且没有被用户在功能列表里关掉的，才执行。
@@ -32,6 +33,7 @@ getUserscripts().then((userscripts) => {
   // 配置入口在功能之前注册：功能执行时可能立刻要用 openSettings，而菜单项本身
   // 对页面零侵入，早注册没有代价
   registerSettingsMenu(userscripts)
+  registerOpenHotkey()
   void mountSettingsEntry()
 
   // 执行匹配的脚本

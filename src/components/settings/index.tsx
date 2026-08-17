@@ -5,6 +5,7 @@ import type { MatchedUserscript } from '@/helpers/scripts'
 import { COMMON_SETTINGS_ID, commonSettingsSchema } from '@/helpers/settings/common'
 import { isFeatureEnabled } from '@/helpers/settings/feature-toggle'
 
+import HotkeyRow from './hotkey-row'
 import SettingsSection from './section'
 
 export interface SettingsPanelProps {
@@ -23,6 +24,13 @@ export interface SettingsPanelProps {
  * 想开关它们，看「功能」页 —— 那里是完整清单，本页只回答「我现在能调什么」。
  */
 export default function SettingsPanel({ scripts, target, request }: SettingsPanelProps) {
+  // 快捷键录制走 schema 的 `render` 逃生舱，但装配放在这里而不是 `common.ts`：
+  // 那个模块被 helpers 层引用，让它 import 组件会形成循环导入
+  const commonSchema = useMemo(
+    () => ({ ...commonSettingsSchema, render: () => <HotkeyRow /> }),
+    [],
+  )
+
   const available = useMemo(
     () => scripts.filter(
       (item) => item.settings && item.matched && isFeatureEnabled(item.script.id),
@@ -56,7 +64,7 @@ export default function SettingsPanel({ scripts, target, request }: SettingsPane
         <SettingsSection
           namespace={COMMON_SETTINGS_ID}
           title={commonSettingsSchema.title!}
-          schema={commonSettingsSchema}
+          schema={commonSchema}
         />
       </div>
 
