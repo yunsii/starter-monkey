@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import type { MatchedUserscript } from '@/helpers/scripts'
 import { COMMON_SETTINGS_ID, commonSettingsSchema } from '@/helpers/settings/common'
 import { isFeatureEnabled } from '@/helpers/settings/feature-toggle'
+import { consumeSettingsTarget } from '@/helpers/settings/open'
 
 import HotkeyRow from './hotkey-row'
 import SettingsSection from './section'
@@ -55,6 +56,10 @@ export default function SettingsPanel({ scripts, target, request }: SettingsPane
     // 只滚动不移动焦点，对键盘和读屏用户等于没有定位
     node.setAttribute('tabindex', '-1')
     node.focus({ preventScroll: true })
+    // 定位完就把目标消费掉，否则切页导致的重新挂载会把它重放一遍。
+    // 只在真的滚动过之后消费：目标区块还没渲染出来时上面已经 return 了，
+    // 留着目标下一次渲染才有机会补上。
+    consumeSettingsTarget()
   }, [targetId, request])
 
   return (

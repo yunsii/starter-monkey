@@ -54,6 +54,18 @@ function setState(next: SettingsUiState) {
   }
 }
 
+/**
+ * 定位目标已经用掉了，从状态里清掉（面板保持展开）。
+ *
+ * 定位是一次性命令，不是常驻状态。留着它的话，任何一次重新挂载都会把定位重放一遍 ——
+ * 切到「功能」页再切回来时 `SettingsPanel` 就是卸载重建的，`useEffect` 的依赖只在同一次
+ * 挂载内去重，管不到跨挂载，于是又滚一次；目标恰好是最后一个区块时下方没内容可滚，
+ * 滚动位置被夹到最大值，表现就是「一切回设置页就跳到底部」（实测踩过）。
+ */
+export function consumeSettingsTarget(): void {
+  setState({ open: state.open, request: state.request })
+}
+
 /** 收起抽屉，动画结束后由 `destroySettings` 真正卸载。 */
 export function collapseSettings(): void {
   setState({ ...state, open: false })
