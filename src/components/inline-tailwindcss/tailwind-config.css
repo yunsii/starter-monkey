@@ -1,3 +1,22 @@
+/*
+ * antd 官方给 Tailwind v4 的集成写法，见「样式兼容」文档：
+ * https://ant.design/docs/react/compatible-style-cn
+ *
+ * `<StyleProvider layer>` 只是把 antd 的样式装进 `@layer antd`，并不声明它和 Tailwind 各层的
+ * 先后 —— cssinjs 给的默认 layer 是 `{ name: 'antd' }`，不带 `dependencies`。于是顺序只由
+ * 「谁先在这个 shadow tree 里出现」决定，而 Tailwind 的样式先插入、antd 的后插入，antd 就排到
+ * 了 `utilities` 之后拿到更高优先级，工具类反而覆盖不了 antd。
+ *
+ * 实测（deepwiki 上的 antd Button，给它加 `p-0`）：
+ *   有这行 → paddingLeft 15px → 0px（工具类生效）
+ *   删这行 → 始终 15px（被 antd 压住）
+ *
+ * ⚠️ 验证这类覆盖关系必须**等过渡结束再读** computed 值：antd 组件带 `transition: .2s`，
+ * 而 transition 声明在 CSS 级联里高于 important，改完立即读只会读到过渡的起始值，
+ * 看起来像「怎么改都不生效」。
+ */
+@layer theme, base, antd, components, utilities;
+
 @import 'tailwindcss';
 
 @plugin '#tailwind-iconify.ts';
