@@ -160,6 +160,10 @@ pnpm verify remove --id tr_xxxxxxxx
 - **`@name` 可能有本地化变体**（`@name:zh-CN`）。Tampermonkey 显示本地化名，
   只改 `@name` 会导致面板上仍是原名，看起来像没装上，实际是装了一个重名副本。
   `install-build` 会把所有 `@name:*` 一起改。
+- **同名脚本并存会让断言读到旧产物**：`(local build)` 与 dev 版 `@match` 相同、挂的
+  自定义元素名也相同，两份同时注入时 `document.querySelector('<host>')` 命中的是先挂上的
+  那一个。症状是代码改了、`install` 重装了、`reload` 也刷了，断言值却一动不动，看起来像
+  HMR 坏了或者改动没编译进去。开工前先 `pnpm verify list` 确认只有一份是启用的。
 - **点了「安装」不等于装上了**。`install` 打印「已点击 Reinstall」只说明按钮被点了。
   `install-build` 会回面板核对；用 `install` 时请自己用 `wait` 在宿主页上确认。
 - **往 Monaco 里塞文字，只调 `element.focus()` 是不够的**——编辑器的 textarea 在

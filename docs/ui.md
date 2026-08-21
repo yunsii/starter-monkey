@@ -105,3 +105,21 @@ pnpm verify eval "v2ex.com" "
   })()
 "
 ```
+
+**查样式覆盖关系必须等过渡结束再读。** antd 这类组件带 `transition`，而 transition 声明在
+CSS 级联里**高于 `!important`** —— 切换 class 之后立刻读 computed 值，拿到的是过渡的起始值，
+于是每次尝试都显示「没生效」，连 inline `!important` 都像是失效了，很容易一路怀疑到
+layer 顺序、缓存、甚至构建产物上去。
+
+```bash
+pnpm verify eval "v2ex.com" "
+  (async () => {
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+    const btn = document.querySelector('starter-monkey-settings').shadowRoot.querySelector('.ant-btn')
+    const 原始 = getComputedStyle(btn).paddingLeft
+    btn.classList.add('p-0')
+    await sleep(500)                                  // 等过渡跑完，别立刻读
+    return { 原始, 覆盖后: getComputedStyle(btn).paddingLeft }
+  })()
+"
+```

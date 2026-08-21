@@ -60,8 +60,10 @@ export function reactRenderInShadowRoot(
       <MountContextProvider {...mountContext} popupContainer={popupContainer}>
         {/*
           antd 的样式注入到 shadow root 内，而不是 document —— 否则 shadow root 里
-          什么都拿不到。`layer` 把 antd 的样式放进 CSS layer，Tailwind 的工具类
-          因此天然覆盖 antd 默认样式，不用靠 `!important` 打架。
+          什么都拿不到。`layer` 把 antd 的样式装进 `@layer antd`，但**只开这里的 `layer`
+          是不够的** —— 它不声明 antd 相对 Tailwind 各层的先后。顺序由
+          `components/inline-tailwindcss/tailwind-config.css` 顶部那行声明钉住，
+          两者缺一不可，Tailwind 的工具类才能覆盖 antd 默认样式，不用靠 `!important` 打架。
         */}
         <StyleProvider container={shadow} layer>
           <ConfigProvider
