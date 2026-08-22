@@ -23,8 +23,11 @@ import type {
  * `position: fixed`，本身就会创建层叠上下文，内容里的 `z-index` 跨不出去；而宿主自己以
  * `z-index: auto` 参与页面的绘制顺序，页面上任何 `z-index > 0` 的元素都能把整个 UI 盖住。
  * 真正决定层级的只有宿主这一层，所以默认值必须落在这里。
+ *
+ * 同一条道理对每一个 `position: fixed` 的中间容器都成立，弹层容器也要用它，
+ * 见 `reactRenderInShadowRoot`。
  */
-const DEFAULT_Z_INDEX = 2147483647
+export const MAX_Z_INDEX = 2147483647
 
 export function applyPosition(
   root: HTMLElement,
@@ -45,11 +48,11 @@ export function applyPosition(
     root.style.width = '0'
     root.style.height = '0'
     root.style.overflow = 'hidden'
-    root.style.zIndex = String(options.zIndex ?? DEFAULT_Z_INDEX)
+    root.style.zIndex = String(options.zIndex ?? MAX_Z_INDEX)
     return
   }
 
-  root.style.zIndex = String(options.zIndex ?? DEFAULT_Z_INDEX)
+  root.style.zIndex = String(options.zIndex ?? MAX_Z_INDEX)
 
   root.style.overflow = 'visible'
   root.style.position = 'relative'

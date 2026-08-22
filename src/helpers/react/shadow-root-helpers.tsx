@@ -8,6 +8,7 @@ import InlineTailwindCSS from '@/components/inline-tailwindcss'
 import { MountContextProvider } from '@/contexts/mount-context'
 import { NAMESPACE } from '@/helpers/namespace'
 import type { ShadowRootContentScriptUiOptions } from '@/helpers/ui/shadow-root'
+import { MAX_Z_INDEX } from '@/helpers/ui/shared'
 
 // Extract the onMount function type from the existing shadow-root options type.
 type OnMountFunction = ShadowRootContentScriptUiOptions<unknown>['onMount']
@@ -40,7 +41,13 @@ export function reactRenderInShadowRoot(
   // （布局矩形照样正常，所以只看 getBoundingClientRect 是发现不了的，要用命中测试）。
   // 定成 fixed 之后容器自己脱离了宿主的裁剪，且它固定在 (0,0)、尺寸为 0，
   // 弹层相对它的绝对坐标恰好就是视口坐标，和弹层库算出来的值一致。
-  popupContainer.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0'
+  //
+  // 但 `position: fixed` 同时会创建层叠上下文，于是这个容器成了一道墙：里面的弹层写多大的
+  // `z-index` 都只在墙内有效，整棵子树以容器自己的 `z-index` 参与外层排序。容器不写
+  // `z-index` 就是 `auto`，页面上任何 `z-index > 0` 的元素都能盖住它 —— 实测一个
+  // `sticky top-0 z-30` 的页面头部，能压住容器里 `z-index: 2147483000` 的模态遮罩。
+  // 宿主是 `inline` 时尤其要紧：那种宿主留在文档流里、不带 z-index，指望不上它兜底。
+  popupContainer.style.cssText = `position:fixed;top:0;left:0;width:0;height:0;z-index:${MAX_Z_INDEX}`
   rootContext.append(reactRootContainer, popupContainer)
   uiContainer.appendChild(rootContext)
   const root = ReactDOM.createRoot(reactRootContainer)
@@ -71,7 +78,8 @@ export function reactRenderInShadowRoot(
             // 出了 shadow root 就丢样式，必须指回 shadow 内的真实元素
             getPopupContainer={() => popupContainer}
             getTargetContainer={() => uiContainer}
-            // 比宿主的 2147483647 略低：弹层要盖住页面，但不该盖住自己的宿主容器
+            // 只决定弹层容器**内部**的先后：容器自己已经顶到 z-index 上限，页面层级不靠这个值。
+            // 留在上限附近是为了压过渲染在 React 树里的抽屉，让色板这类弹层浮在抽屉之上。
             theme={{ token: { zIndexPopupBase: 2147483000 } }}
           >
             {_app}
