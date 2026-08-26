@@ -22,14 +22,9 @@ export function registerSettingsMenu(scripts: MatchedUserscript[]): void {
     return
   }
 
-  const configurable = scripts.filter((item) => item.settings)
-  if (configurable.length === 0) {
-    return
-  }
-
-  // 只给当前页面活跃的功能注册：菜单是按标签页呈现的，列出在这个页面上根本不跑的
-  // 功能只会制造困惑。不活跃的功能在聚合面板里仍然可见可配。
-  for (const item of configurable.filter((script) => script.matched)) {
+  // 单独入口只给「当前页面活跃、且自己声明了配置」的功能：菜单是按标签页呈现的，
+  // 列出在这个页面上根本不跑的功能只会制造困惑。不活跃的功能在聚合面板里仍然可见可配。
+  for (const item of scripts.filter((script) => script.settings && script.matched)) {
     GM_registerMenuCommand(
       `⚙ ${item.settings?.title ?? item.script.displayName}`,
       () => {
@@ -39,6 +34,10 @@ export function registerSettingsMenu(scripts: MatchedUserscript[]): void {
     )
   }
 
+  // 「全部配置」无条件注册，不能因为「没有任何功能声明 settings」就跳过：面板里除了各功能
+  // 自己的配置，还有框架级的「通用」分组（悬浮入口、快捷键、入口配色…）和列出全部功能的
+  // 启用开关，一个 schema 都没有时这些依然要进得去。何况菜单是唯一对页面零侵入的入口，
+  // 恰恰是这种「功能还没长出配置」的早期阶段最需要它。
   GM_registerMenuCommand(
     '⚙ 全部配置',
     () => {
