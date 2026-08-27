@@ -1,5 +1,6 @@
 import { matchPattern } from 'browser-extension-url-match'
 
+import { matchesInclude } from './include-pattern'
 import { interopDefault } from './modules'
 
 import type { SettingsSchema } from './settings/types'
@@ -50,9 +51,7 @@ export async function getUserscripts(): Promise<MatchedUserscript[]> {
     if (isUserscriptWithIncludes) {
       return {
         ...common,
-        matched: userscript.includes.some((item) => {
-          return (new RegExp(item)).test(`/${window.location.href}/`)
-        }),
+        matched: matchesInclude(userscript.includes, window.location.href),
       }
     } else {
       return {
