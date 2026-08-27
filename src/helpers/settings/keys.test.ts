@@ -40,7 +40,9 @@ describe('反解', () => {
 
   it('不是本模板的键返回 null', () => {
     // GM 存储是整个脚本共用的，将来放别的东西时不能误判成配置项
-    assert.equal(parseKey('someone-else:ns.field'), null)
+    // 前缀也从 NAMESPACE 推导：写死一个名字的话，fork 的人万一取了同名，
+    // 这条断言会反过来红 —— 而「fork 只改 namespace.ts 一处」是本仓库承诺过的
+    assert.equal(parseKey(`not-${NAMESPACE}:ns.field`), null)
     assert.equal(parseKey(`${PREFIX}nodot`), null)
     assert.equal(parseKey(`${PREFIX}.field`), null)
     assert.equal(parseKey(`${PREFIX}ns.`), null)

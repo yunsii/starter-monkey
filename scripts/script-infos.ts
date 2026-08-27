@@ -3,6 +3,8 @@ import { readFileSync } from 'node:fs'
 import ts from 'typescript'
 import { glob } from 'zx'
 
+import { CUSTOM_ELEMENT_NAME_PATTERN } from '../src/helpers/namespace.ts'
+
 /**
  * `includes` 里的字符串必须带 `/.../` 定界符 —— 与 `src/helpers/include-pattern.ts` 的运行时
  * 编译共用同一个约定（那边是运行时兜底，这边让它在 `pnpm build` 就报出来）。
@@ -83,10 +85,21 @@ function parseScriptInfo(sourceCode: string): UserscriptConfig {
 
   visit(sourceFile)
 
-  // `id` 是配置的存储命名空间，含 `.` 或 `@` 会破坏键结构，反解不回来时表现为
-  // 「配置改了不生效」，所以在构建期就拦下
-  if (id && !/^[\w-]+$/.test(id)) {
-    throw new Error(`Script.id 只能包含字母、数字、下划线和连字符，收到：${JSON.stringify(id)}`)
+  // `id` 有两个用途，取更严的那个：
+  //
+  // 1. 配置的存储命名空间 —— 含 `.` 或 `@` 会破坏键结构，反解不回来时表现为「配置改了不生效」。
+  // 2. **自定义元素名** —— `src/scripts/v2ex/demo/index.tsx` 就是 `name: Script.id`。
+  //    这一条严得多：必须小写字母开头、必须含连字符，否则 `customElements.define` 抛
+  //    `SyntaxError`，整个功能的 UI 直接不出现。旧的 `/^[\w-]+$/` 放行了 `mydemo`、
+  //    `MyDemo`、`my_demo` 这三种，它们都过不了运行时。
+  //
+  // 规则跟 `NAMESPACE` 共用一处，别在这里另写一遍。
+  if (id && !CUSTOM_ELEMENT_NAME_PATTERN.test(id)) {
+    throw new Error(
+      `Script.id 只能是小写字母、数字和连字符，且必须含至少一个连字符，收到：${JSON.stringify(id)}\n`
+      + '提示：它会被当作自定义元素名使用（`createShadowRootUi({ name: Script.id })`），'
+      + '大写、下划线或没有连字符都会让 customElements.define 抛 SyntaxError',
+    )
   }
 
   if (id && displayName && includes.length > 0) {

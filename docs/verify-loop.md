@@ -191,6 +191,9 @@ pnpm verify remove --id tr_xxxxxxxx
   跑在 Windows 宿主上就是这样）`visibilityState` 照旧是 `hidden`。要做命中测试就先把动画推到
   终态（给 wrapper 设一次 `transform: none`）；行为断言则完全不必等它 —— `element.click()`
   和 `dispatchEvent` 都不要求元素可见。
+- **这份文档里的 `starter-monkey-*` 都是示例值**。DOM 属性、元素 id、自定义元素名全都从
+  `src/helpers/namespace.ts` 的 `NAMESPACE` 推导，fork 改过之后照抄这里的命令会一个都查不到，
+  症状恰好和「脚本没装上」一模一样。抄之前先看一眼那个常量。
 - **别用 `textContent` 判断 UI 的开合**。shadow root 的 `textContent` 把里面的 `<style>`
   文本也算进去。判「编辑器弹窗关掉了没」时断言「不含 `Monaco`」会永远失败 —— Monaco 的
   样式表里本来就有 `Monaco`（字体族），而样式不随内容卸载被移除。开合要断言真正会消失的

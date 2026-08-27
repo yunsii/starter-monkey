@@ -1,8 +1,15 @@
 @reference '#tailwind-config.css';
 
-#starter-monkey-root {
-  @apply mx-auto my-0 p-8 max-w-320 text-center;
-}
+/*
+  这个文件由 `import './app.css'` 引入，最终经 vite-plugin-monkey 注入到 **document**。
+  所以它只能选到宿主页上的东西 —— 下面这条 `body` 是有效的。
+
+  别在这里写 shadow root 内部的选择器：曾经有一条 `#starter-monkey-root { ... }`，
+  而那个容器（`helpers/react/shadow-root-helpers.tsx` 建的）在 shadow root 里，
+  document 的样式表选不到它，这条规则从来没生效过。要给容器加样式请在组件里写 className，
+  或者走 `components/inline-tailwindcss` 那条注入 shadow 的路。顺带一提它还写死了
+  `starter-monkey`，而那个 id 是从 `NAMESPACE` 推导的 —— fork 之后连名字都对不上。
+*/
 
 body {
   @apply flex items-center;
