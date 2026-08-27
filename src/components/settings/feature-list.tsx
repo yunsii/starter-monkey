@@ -2,6 +2,7 @@ import { Empty, Switch, Tooltip } from 'antd'
 import { useCallback, useMemo, useSyncExternalStore } from 'react'
 
 import type { MatchedUserscript } from '@/helpers/scripts'
+import { detectHasPanelContent } from '@/helpers/settings/actions'
 import {
   FEATURE_ENABLED_FIELD,
   isFeatureEnabled,
@@ -97,8 +98,11 @@ export default function FeatureList({ scripts }: FeatureListProps) {
 
       {ordered.map((item) => {
         const enabled = enabledMap.get(item.script.id) ?? true
-        // 设置页只列「当前页面生效且已启用」的功能，可点性必须和它保持一致
-        const configurableNow = Boolean(item.settings) && item.matched && enabled
+        // 设置页只列「当前页面生效且已启用」的功能，可点性必须和它保持一致，
+        // 所以「有没有东西可显示」这一问走同一个判断
+        const configurableNow = detectHasPanelContent(item.script.id, Boolean(item.settings))
+          && item.matched
+          && enabled
         return (
           <PanelItem
             key={item.script.id}

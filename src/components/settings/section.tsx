@@ -10,6 +10,7 @@ import {
 import { createSettingsStore } from '@/helpers/settings/storage'
 import { schemaDefaults } from '@/helpers/settings/types'
 import type { SettingsField, SettingsSchema, SettingsValues } from '@/helpers/settings/types'
+import { useFeatureActions } from '@/hooks/settings'
 
 import SettingsActions from './actions'
 import SettingsFieldRow from './field'
@@ -89,9 +90,17 @@ export default function SettingsSection(props: SettingsSectionProps) {
     )
   }
 
-  const normalFields = fields.filter(([, field]) => !field.advanced)
-  const advancedFields = fields.filter(([, field]) => field.advanced)
-  const advancedRows = advancedFields.map(renderField).filter(Boolean)
+  const actions = useFeatureActions(namespace)
+  const normalRows = fields.filter(([, field]) => !field.advanced).map(renderField).filter(Boolean)
+  const advancedRows = fields.filter(([, field]) => field.advanced).map(renderField).filter(Boolean)
+  const customRows = schema.render?.({ store, values, setValue: write })
+
+  // 分隔线只在**上面真的有东西**时才画：一条悬空的线比没有线更难解释。
+  // 「上面有东西」不能只看常规字段声明了几个 —— 它们可能全被 `visible` 过滤掉，
+  // 动作数量又只有注册表知道，所以三样都得实际问一遍。
+  const hasContentAbove = normalRows.length > 0
+    || actions.length > 0
+    || Boolean(customRows)
 
   return (
     <section className='flex flex-col gap-2'>
@@ -100,18 +109,21 @@ export default function SettingsSection(props: SettingsSectionProps) {
         <p className='m-0 text-xs text-gray-400'>{schema.description}</p>
       )}
 
-      {normalFields.map(renderField)}
+      {normalRows}
 
-      <SettingsActions namespace={namespace} />
+      <SettingsActions actions={actions} />
 
-      {schema.render?.({ store, values, setValue: write })}
+      {customRows}
 
       {/*
-        分隔线只在真的有进阶项、且上面有内容时才出现 —— 一条悬空的线比没有线更难解释。
         不给标题：加一行「进阶」会让这一小段看起来像另一个分组，而它属于同一个功能。
       */}
       {advancedRows.length > 0 && (
-        <div className='mt-1 flex flex-col gap-2 border-t border-gray-200 pt-3'>
+        <div className={`
+          flex flex-col gap-2
+          ${hasContentAbove ? 'mt-1 border-t border-gray-200 pt-3' : ''}
+        `}
+        >
           {advancedRows}
         </div>
       )}

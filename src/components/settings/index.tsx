@@ -1,7 +1,12 @@
 import { Empty } from 'antd'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react'
 
 import type { MatchedUserscript } from '@/helpers/scripts'
+import {
+  detectHasPanelContent,
+  getFeatureActionsRevision,
+  subscribeFeatureActions,
+} from '@/helpers/settings/actions'
 import { COMMON_SETTINGS_ID, commonSettingsSchema } from '@/helpers/settings/common'
 import { isFeatureEnabled } from '@/helpers/settings/feature-toggle'
 import { consumeSettingsTarget } from '@/helpers/settings/open'
@@ -32,12 +37,18 @@ export default function SettingsPanel({ scripts, target, request }: SettingsPane
     [],
   )
 
-  const available = useMemo(
-    () => scripts.filter(
-      (item) => item.settings && item.matched && isFeatureEnabled(item.script.id),
-    ),
-    [scripts],
-  )
+  // 动作是运行时注册的，所以「这个功能该不该出现」也得跟着注册表变化重算
+  const actionsRevision = useSyncExternalStore(subscribeFeatureActions, getFeatureActionsRevision)
+
+  // 只注册了动作、没有任何配置项的功能同样要列出来 —— 否则它的动作没有落脚的地方
+  const available = useMemo(() => {
+    void actionsRevision
+    return scripts.filter(
+      (item) => detectHasPanelContent(item.script.id, Boolean(item.settings))
+        && item.matched
+        && isFeatureEnabled(item.script.id),
+    )
+  }, [scripts, actionsRevision])
 
   const containerRef = useRef<HTMLDivElement>(null)
   const targetId = target?.split('.')[0]
@@ -91,7 +102,7 @@ export default function SettingsPanel({ scripts, target, request }: SettingsPane
           <SettingsSection
             namespace={item.script.id}
             title={item.settings?.title ?? item.script.displayName}
-            schema={item.settings!}
+            schema={item.settings ?? {}}
           />
         </div>
       ))}

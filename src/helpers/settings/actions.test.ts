@@ -6,15 +6,21 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 
 import {
+  detectHasPanelContent,
   getFeatureActions,
+  getFeatureActionsRevision,
   registerFeatureActions,
   subscribeFeatureActions,
 } from './actions.ts'
 
-import type { FeatureAction } from './actions.ts'
+import type { FeatureAction, FeatureToggleAction } from './actions.ts'
 
 function trigger(id: string): FeatureAction {
   return { type: 'trigger', id, label: id, onTrigger: () => {} }
+}
+
+function toggle(id: string, checked: boolean): FeatureAction {
+  return { type: 'toggle', id, label: id, checked, onChange: () => {} }
 }
 
 describe('getFeatureActions', () => {
@@ -46,6 +52,26 @@ describe('registerFeatureActions', () => {
     registerFeatureActions('script', [])()
   })
 
+  it('两种类型都能注册，读回来还是原样', () => {
+    const actions = [toggle('t', false), trigger('r')]
+    const unregister = registerFeatureActions('script', actions)
+    assert.deepEqual(getFeatureActions('script').map((item) => item.type), ['toggle', 'trigger'])
+    unregister()
+  })
+
+  it('toggle 的 checked 靠重新注册推动', () => {
+    // 这是 `FeatureToggleAction.checked` 的可执行版说明：它是注册时的快照，不是活引用。
+    // 调用方漏了把状态写进 effect 依赖时，面板上的开关就会停在旧值、点了不动
+    const first = registerFeatureActions('script', [toggle('t', false)])
+    assert.equal((getFeatureActions('script')[0] as FeatureToggleAction).checked, false)
+
+    registerFeatureActions('script', [toggle('t', true)])
+    assert.equal((getFeatureActions('script')[0] as FeatureToggleAction).checked, true)
+
+    first()
+    registerFeatureActions('script', [])()
+  })
+
   it('注销后回到空', () => {
     const unregister = registerFeatureActions('script', [trigger('one')])
     unregister()
@@ -66,5 +92,31 @@ describe('registerFeatureActions', () => {
     unsubscribe()
     registerFeatureActions('script', [trigger('one')])()
     assert.equal(calls, 2)
+  })
+})
+
+describe('detectHasPanelContent', () => {
+  it('没有配置项但注册了动作，也算有内容', () => {
+    // 只注册动作、不声明 settings 的功能必须能出现在面板里，否则动作没有落脚的地方
+    assert.equal(detectHasPanelContent('action-only', false), false)
+    const unregister = registerFeatureActions('action-only', [trigger('one')])
+    assert.equal(detectHasPanelContent('action-only', false), true)
+    unregister()
+    assert.equal(detectHasPanelContent('action-only', false), false)
+  })
+
+  it('有配置项时与动作无关', () => {
+    assert.equal(detectHasPanelContent('never-registered', true), true)
+  })
+})
+
+describe('getFeatureActionsRevision', () => {
+  it('每次注册与注销都递增', () => {
+    // 面板判断「这个功能该不该出现」跨所有功能，没法用单个数组的引用当快照
+    const before = getFeatureActionsRevision()
+    const unregister = registerFeatureActions('script', [trigger('one')])
+    assert.equal(getFeatureActionsRevision(), before + 1)
+    unregister()
+    assert.equal(getFeatureActionsRevision(), before + 2)
   })
 })

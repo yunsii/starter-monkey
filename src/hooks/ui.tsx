@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { useElementsMutationObserver } from 'react-dx'
 
 import ShadowModal from '@/components/shadow-modal'
@@ -131,7 +131,18 @@ export function useShadowModal(options: UseShadowModalOptions) {
     store.setState({ open: !store.getSnapshot().open })
   }, [store])
 
+  // 开合状态也交出去：功能要据此注册 toggle 动作（`helpers/settings/actions.ts`），
+  // 而那个动作的 `checked` 是注册时的快照，读不到状态就只能退化成「打开」这种单向命令。
+  //
+  // 只订阅 `open` 而不是整个快照：`content` 每次 render 都是新引用，订阅整个快照会让
+  // 调用方跟着内容变化一起重渲染。
+  const open = useSyncExternalStore(
+    store.subscribe,
+    () => store.getSnapshot().open,
+  )
+
   return {
+    open,
     toggleModal,
   }
 }

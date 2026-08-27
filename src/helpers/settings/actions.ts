@@ -1,10 +1,16 @@
 interface FeatureActionBase {
-  /** 同一个功能内唯一，用作列表的 key，也便于在日志里指认 */
+  /** 同一个功能内唯一，用作列表的 key */
   id: string
   label: string
   /** 副标题。动作脱离上下文后，光看标题经常猜不出会发生什么 */
   description?: string
-  /** iconify class，如 `i-bx--window-open` */
+  /**
+   * iconify class，如 `i-bx--edit`。
+   *
+   * **必须是源码里的字面量。** Tailwind 是扫源文件的原始文本来决定生成哪些类，
+   * 从配置、接口或字符串拼接来的图标名扫不到，产物里就没有对应规则 —— 症状是图标位置
+   * 一片空白，而 class 明明挂上去了。同一个约束也管着 `Script.matches` / `Script.includes`。
+   */
   icon?: string
 }
 
@@ -16,6 +22,14 @@ interface FeatureActionBase {
  */
 export interface FeatureToggleAction extends FeatureActionBase {
   type: 'toggle'
+  /**
+   * **注册时的快照，不是活引用。**
+   *
+   * 面板上的 Switch 直接由它驱动，而动作是个静态对象：状态变了必须重新
+   * `registerFeatureActions` 才能推动它。实践上就是把那个状态写进注册 effect 的依赖数组
+   * —— 漏了的话开关会一直停在旧值，点了不动，而症状完全不指向这里。
+   * 参照 `src/scripts/v2ex/demo/app.tsx`。
+   */
   checked: boolean
   onChange: (checked: boolean) => void
 }
@@ -43,6 +57,15 @@ const registry = new Map<string, FeatureAction[]>()
 const listeners = new Set<() => void>()
 
 /**
+ * 每次注册/注销递增。
+ *
+ * 配置面板要回答「这个功能该不该出现」——一个只注册了动作、没有任何配置项的功能也得出现，
+ * 否则它的动作没有落脚的地方。那个判断跨所有功能，没法用单个 `getFeatureActions` 的引用
+ * 当快照，所以给一个稳定的版本号（原始值，`useSyncExternalStore` 不会因它无限重渲染）。
+ */
+let revision = 0
+
+/**
  * 未注册时返回同一个空数组。
  *
  * `useSyncExternalStore` 要求快照引用稳定，每次返回新的 `[]` 会无限重渲染 ——
@@ -51,6 +74,7 @@ const listeners = new Set<() => void>()
 const EMPTY: readonly FeatureAction[] = []
 
 function emit() {
+  revision += 1
   for (const listener of listeners) {
     listener()
   }
@@ -81,6 +105,22 @@ export function registerFeatureActions(scriptId: string, actions: FeatureAction[
 
 export function getFeatureActions(scriptId: string): readonly FeatureAction[] {
   return registry.get(scriptId) ?? EMPTY
+}
+
+export function getFeatureActionsRevision(): number {
+  return revision
+}
+
+/**
+ * 这个功能在配置面板里有没有东西可显示：声明了配置项，或注册了动作。
+ *
+ * 抽成一处是因为有两个消费方必须给出同一个答案 —— 面板要不要列出这一组
+ * （`components/settings/index.tsx`），以及功能页的齿轮能不能点
+ * （`components/settings/feature-list.tsx`）。两边各写一遍，迟早出现「齿轮能点、
+ * 跳过去却是空的」或者反过来「有动作却没有入口」。
+ */
+export function detectHasPanelContent(scriptId: string, hasSettings: boolean): boolean {
+  return hasSettings || getFeatureActions(scriptId).length > 0
 }
 
 export function subscribeFeatureActions(listener: () => void): () => void {
