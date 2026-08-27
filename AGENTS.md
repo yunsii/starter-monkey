@@ -53,9 +53,10 @@ userscript 元数据。因此：
 
 只读匹配当前任务的那一篇，不要预加载全部。
 
-| 任务                                                           | 读                                            |
-| -------------------------------------------------------------- | --------------------------------------------- |
-| shadow root UI 的定位方式、样式隔离、document 级 CSS、弹层容器 | [docs/ui.md](docs/ui.md)                      |
-| 在真实浏览器 / Tampermonkey 上验证脚本，自动化验收循环         | [docs/verify-loop.md](docs/verify-loop.md)    |
-| 新增或修改一个用户脚本                                         | 上面第一条 Hard Rule + `src/scripts/*/demo/`  |
-| 命名前缀（DOM 属性、元素 id、CSS 变量、日志）                  | `src/helpers/namespace.ts`（fork 后改这一处） |
+| 任务                                                                | 读                                                                  |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| shadow root UI 的定位方式、样式隔离、document 级 CSS、弹层容器      | [docs/ui.md](docs/ui.md)                                            |
+| 在真实浏览器 / Tampermonkey 上验证脚本，自动化验收循环              | [docs/verify-loop.md](docs/verify-loop.md)                          |
+| 新增或修改一个用户脚本                                              | 上面第一条 Hard Rule + `src/scripts/*/demo/`                        |
+| 命名前缀（DOM 属性、元素 id、CSS 变量、日志）                       | `src/helpers/namespace.ts`（fork 后改这一处）                       |
+| 新增纯逻辑模块，或给 helper 加日志（能不能被 `node --test` 直接跑） | [docs/verify-loop.md](docs/verify-loop.md) 「不需要浏览器的那一半」 |
