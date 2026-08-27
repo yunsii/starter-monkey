@@ -6,6 +6,13 @@ export interface PanelItemProps {
   action?: React.ReactNode
   /** 标题行之下的整行内容：输入框、注入范围列表这类需要整行宽度的东西 */
   children?: React.ReactNode
+  /**
+   * 整行可点。用于「点一下就执行」的条目 —— 那种条目不该在右侧摆一个写着「执行」的按钮，
+   * 动词是什么全靠标题说清楚，按钮只会重复一遍。
+   *
+   * 给了它才有 hover 反馈与键盘可达（Enter / Space），没给就是纯展示的卡片。
+   */
+  onClick?: () => void
 }
 
 /**
@@ -23,9 +30,31 @@ export interface PanelItemProps {
  *
  * 窄控件（开关、颜色、数字）放 `action`，需要整行的（输入框、下拉、多行文本）放 `children`。
  */
-export default function PanelItem({ title, description, action, children }: PanelItemProps) {
+export default function PanelItem({ title, description, action, children, onClick }: PanelItemProps) {
   return (
-    <div className='flex flex-col gap-1 rounded-lg bg-gray-50 px-3 py-2.5'>
+    <div
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      className={`
+        flex flex-col gap-1 rounded-lg bg-gray-50 px-3 py-2.5
+        ${onClick
+      ? `
+        cursor-pointer transition-colors outline-none
+        hover:bg-gray-100
+        focus-visible:ring-2 focus-visible:ring-blue-400
+      `
+      : ''}
+      `}
+      onClick={onClick}
+      onKeyDown={onClick
+        ? (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              onClick()
+            }
+          }
+        : undefined}
+    >
       <div className='flex items-center gap-2'>
         <span className='min-w-0 text-sm font-medium text-gray-700'>{title}</span>
         {action && (
