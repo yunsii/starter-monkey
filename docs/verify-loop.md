@@ -191,6 +191,11 @@ pnpm verify remove --id tr_xxxxxxxx
   跑在 Windows 宿主上就是这样）`visibilityState` 照旧是 `hidden`。要做命中测试就先把动画推到
   终态（给 wrapper 设一次 `transform: none`）；行为断言则完全不必等它 —— `element.click()`
   和 `dispatchEvent` 都不要求元素可见。
+- **别用 `textContent` 判断 UI 的开合**。shadow root 的 `textContent` 把里面的 `<style>`
+  文本也算进去。判「编辑器弹窗关掉了没」时断言「不含 `Monaco`」会永远失败 —— Monaco 的
+  样式表里本来就有 `Monaco`（字体族），而样式不随内容卸载被移除。开合要断言真正会消失的
+  那个节点（遮罩、容器，也就是组件关闭时 `return null` 的那一层）。这是本节第三个
+  「断言对象选错」，规律很稳定：下断言之前先问一句「这个对象在关闭之后到底还在不在」。
 - **图标类走的是 `mask-image`，不是 `background-image`**。想确认 `i-bx--*` 到底有没有渲染出来，
   要读 `getComputedStyle(el).maskImage`；读 `backgroundImage` 只会拿到 `none`，据此得出的
   「图标没生成」是假警报。又一次「断言对象选错」。
