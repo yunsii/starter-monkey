@@ -1,5 +1,6 @@
 import SettingsFloatingEntry from '@/components/settings/floating-entry'
 import { logger } from '@/helpers/logger'
+import { NAMESPACE } from '@/helpers/namespace'
 import { reactRenderInShadowRoot } from '@/helpers/react/shadow-root-helpers'
 import { createShadowRootUi } from '@/helpers/ui/shadow-root'
 import type { ShadowRootUi } from '@/helpers/ui/shadow-root'
@@ -8,7 +9,7 @@ import { commonSettingsSchema, commonSettingsStore } from './common'
 import { openSettings } from './open'
 import { subscribeSettingsRevision } from './revision'
 
-const HOST_NAME = 'starter-monkey-settings-entry'
+const HOST_NAME = `${NAMESPACE}-settings-entry`
 const FIELD = 'showFloatingEntry'
 
 let ui: ShadowRootUi<ReturnType<typeof reactRenderInShadowRoot>> | null = null

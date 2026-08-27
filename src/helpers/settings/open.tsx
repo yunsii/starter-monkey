@@ -1,11 +1,12 @@
 import SettingsHost from '@/components/settings/host'
+import { NAMESPACE } from '@/helpers/namespace'
 import { reactRenderInShadowRoot } from '@/helpers/react/shadow-root-helpers'
 import { createShadowRootUi } from '@/helpers/ui/shadow-root'
 import type { ShadowRootUi } from '@/helpers/ui/shadow-root'
 
 import { getUserscripts } from '../scripts'
 
-const HOST_NAME = 'starter-monkey-settings'
+const HOST_NAME = `${NAMESPACE}-settings`
 
 let ui: ShadowRootUi<ReturnType<typeof reactRenderInShadowRoot>> | null = null
 let opening: Promise<void> | null = null
