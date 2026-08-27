@@ -32,6 +32,8 @@ export const settings: SettingsSchema = {
       label: '编辑器初始内容',
       description: '打开编辑器时预填的文本，留空则不预填',
       default: 'Hello, world!',
+      // 三项里最少被动的一项，用它演示 `advanced`：会排到动作之后、隔一条分隔线
+      advanced: true,
     },
   },
 }

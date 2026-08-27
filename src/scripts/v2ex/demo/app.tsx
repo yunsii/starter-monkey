@@ -1,4 +1,5 @@
 import MonacoEditor from '@/components/monaco-editor'
+import { registerFeatureActions } from '@/helpers/settings/actions'
 import { useSettings } from '@/hooks/settings'
 import useCreateUis, { useShadowModal } from '@/hooks/ui'
 
@@ -36,6 +37,22 @@ export default function App() {
       </div>
     ),
   })
+
+  // 把「打开编辑器」注册成动作，配置面板里就能直接开 —— 否则只能先在页面上找到一个
+  // 主题链接。返回值当清理函数：功能卸载后面板里不该还留着点了没反应的条目
+  useEffect(
+    () => registerFeatureActions(Script.id, [
+      {
+        type: 'trigger',
+        id: 'open-editor',
+        label: '打开编辑器',
+        description: '不必先找一个主题链接，直接打开编辑器弹窗',
+        icon: 'i-bx--bx-edit',
+        onTrigger: toggleEditorModal,
+      },
+    ]),
+    [toggleEditorModal],
+  )
 
   useCreateUis('a.topic-link', async (element) => {
     return createShadowRootUi({

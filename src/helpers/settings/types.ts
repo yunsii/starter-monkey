@@ -26,6 +26,13 @@ interface FieldBase<T> {
    * 这里只处理「用户刚刚在这个面板上改了它」。
    */
   onChange?: (value: T) => void
+  /**
+   * 低频的进阶项，排到这一组的**最后**（动作与 `render` 之后），并与上面拉开一条分隔线。
+   *
+   * 是标记而不是 `order: number`：位置该由框架统一决定，各功能自己编号迟早会互相矛盾，
+   * 而「这一项是不是进阶」是声明方唯一真正知道的事。开发者模式、诊断开关这类归它。
+   */
+  advanced?: boolean
 }
 
 export interface BooleanField extends FieldBase<boolean> {
@@ -92,17 +99,34 @@ export interface SettingsCustomRenderContext {
   setValue: (field: string, value: unknown) => void
 }
 
+/**
+ * 一个功能的配置声明。
+ *
+ * 一组的呈现顺序是固定的，四段：
+ *
+ * ```
+ * 常规字段 → 动作 → render 逃生舱 → 进阶字段（advanced）
+ * ```
+ *
+ * 顺序由框架定死而不是交给声明方：各功能自己排，同一份面板里就会出现好几种阅读顺序。
+ * 需要往「动作之后」放东西时，用字段的 `advanced` 标记，而不是把它塞进 `render`。
+ *
+ * **动作不在这里**。它们由正在运行的功能通过 `helpers/settings/actions.ts` 注册 ——
+ * schema 是「不执行功能也能读」的静态声明（面板正是靠这一点列出当前页面不匹配的功能），
+ * 而动作的 handler 必须闭包住运行时状态，静态对象表达不了。
+ */
 export interface SettingsSchema {
   /** 面板上这一组的标题，缺省时用功能的 `displayName`。 */
   title?: string
   description?: string
   fields?: Record<string, SettingsField>
   /**
-   * 自定义渲染，追加在字段之后。
+   * 自定义渲染，追加在字段与动作之后。
    *
    * 用于 schema 表达不了的控件（快捷键录制、带校验的复合编辑器等）。
    * 约束：不能依赖「功能已经在当前页面跑起来」—— 配置面板会列出所有功能，
-   * 包括在当前站点不活跃的那些，此时功能本体并未执行。
+   * 包括在当前站点不活跃的那些，此时功能本体并未执行。要依赖运行时状态的是**动作**，
+   * 走 `registerFeatureActions`。
    */
   render?: (context: SettingsCustomRenderContext) => React.ReactNode
 }
