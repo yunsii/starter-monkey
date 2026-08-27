@@ -9,7 +9,7 @@ export default function App() {
   // 配置变化即时生效，不需要刷新页面；另一个标签页改的也会同步过来
   const { values } = useSettings(Script.id, settings)
 
-  const { toggleModal: toggleEditorModal } = useShadowModal({
+  const { open: editorOpen, toggleModal: toggleEditorModal } = useShadowModal({
     name: 'v2ex-demo-editor',
     content: (
       <div className='bg-white'>
@@ -38,20 +38,28 @@ export default function App() {
     ),
   })
 
-  // 把「打开编辑器」注册成动作，配置面板里就能直接开 —— 否则只能先在页面上找到一个
-  // 主题链接。返回值当清理函数：功能卸载后面板里不该还留着点了没反应的条目
+  // 把编辑器的开合注册成动作，配置面板里就能直接开 —— 否则只能先在页面上找到一个主题链接。
+  // 返回值当清理函数：功能卸载后面板里不该还留着点了没反应的条目。
+  //
+  // 用 toggle 而不是「打开编辑器」这种单向命令：弹窗开着的时候，一条写着「打开」的条目
+  // 是在说谎，而开关直接就把状态摆在那里。
+  //
+  // `editorOpen` 必须在依赖里：`checked` 是注册时的快照，漏了它面板上的开关就会停在旧值，
+  // 点了不动 —— 详见 `FeatureToggleAction.checked` 的注释。
   useEffect(
     () => registerFeatureActions(Script.id, [
       {
-        type: 'trigger',
-        id: 'open-editor',
-        label: '打开编辑器',
-        description: '不必先找一个主题链接，直接打开编辑器弹窗',
-        icon: 'i-bx--bx-edit',
-        onTrigger: toggleEditorModal,
+        type: 'toggle',
+        id: 'editor',
+        label: '编辑器',
+        description: '不必先找一个主题链接，这里直接开合编辑器弹窗',
+        icon: 'i-bx--edit',
+        checked: editorOpen,
+        // Switch 给的 next 恒等于当前状态取反，所以 toggle 就够用
+        onChange: toggleEditorModal,
       },
     ]),
-    [toggleEditorModal],
+    [editorOpen, toggleEditorModal],
   )
 
   useCreateUis('a.topic-link', async (element) => {
