@@ -174,13 +174,26 @@ pnpm verify remove --id tr_xxxxxxxx
   回读收到的按键：一条都没有就是事件没送达，而不是匹配没中。替代路径是 `element.click()`，
   它不依赖焦点。快捷键这类入口因此不适合当验收的**唯一**通路。
 - **别拿跨大版本改过的类名做断言**。`.ant-drawer-content` 是 antd 5 的类名，antd 6 没有 ——
-  抽屉明明开着（`ant-drawer-open` 在、标题也在），断言却报「没打开」。这和上面「查看不见
-  必须用命中测试」是同一类陷阱：断言对象选错了，失败信息会把你引向完全无关的方向。
+  抽屉明明开着（`ant-drawer-open` 在、标题也在），断言却报「没打开」。这和
+  [docs/ui.md](ui.md) 里「查『看不见』必须用命中测试」是同一类陷阱：断言对象选错了，
+  失败信息会把你引向完全无关的方向。
 - **反向对照必须只差一个变量**。做「去掉某个补丁看是不是真的会坏」这类对照时，如果上一轮
   验收顺手点过某个会**写进 GM 存储**的开关（悬浮入口、功能启用……），那个状态会跨构建留存，
   于是你以为在测补丁，实际在测自己上一步的副作用 —— 实测把「点击抛异常」误读成了「整个
   不渲染」，结论完全反了。所以验收动作优先选**不写持久状态**的目标；下结论前先确认对照组
   只差预期那一项。
+- **后台标签的 `requestAnimationFrame` 被冻结，弹层的入场动画会停在起点**。`Target.createTarget`
+  开出来的宿主页标签 `document.visibilityState` 是 `hidden`，rAF 不执行 —— antd 抽屉的入场动画
+  由 rc-motion 驱动，于是 `.ant-drawer-content-wrapper` 一直停在 `translateX(100%)`。症状很像
+  「被什么东西盖住了」：`.ant-drawer-open` 在、元素查得到、文本读得出，但
+  `getBoundingClientRect()` 的 `x` 落在视口右侧之外，`elementFromPoint` 返回 `null`。
+  `Page.bringToFront` 只能把它设成所在窗口的活动标签，窗口本身不在前台时（WSL2 里 Chrome
+  跑在 Windows 宿主上就是这样）`visibilityState` 照旧是 `hidden`。要做命中测试就先把动画推到
+  终态（给 wrapper 设一次 `transform: none`）；行为断言则完全不必等它 —— `element.click()`
+  和 `dispatchEvent` 都不要求元素可见。
+- **图标类走的是 `mask-image`，不是 `background-image`**。想确认 `i-bx--*` 到底有没有渲染出来，
+  要读 `getComputedStyle(el).maskImage`；读 `backgroundImage` 只会拿到 `none`，据此得出的
+  「图标没生成」是假警报。又一次「断言对象选错」。
 - **用户脚本管理器的菜单项目前验不了**。Tampermonkey 的 popup 需要真实的浏览器动作上下文：
   用 `Target.createTarget` 开成普通标签，它会把「当前活动标签」查到自己头上，列不出任何
   菜单命令（换独立窗口、或先聚焦宿主页再刷新，都不行）。菜单恰恰是唯一对页面零侵入的入口，
@@ -189,5 +202,9 @@ pnpm verify remove --id tr_xxxxxxxx
 
 ## 不需要浏览器的那一半
 
-`pnpm test` 跑 `node --test`（Node 内置，零依赖），目前覆盖元数据改写逻辑。
-纯逻辑能在这里断言的，就不要放到浏览器循环里——后者慢、需要前提、且失败原因更含糊。
+`pnpm test` 跑 `node --test`（Node 内置，零依赖），目前覆盖元数据改写、`includes` 模式编译、
+快捷键解析、配置存储键这几块纯逻辑。纯逻辑能在这里断言的，就不要放到浏览器循环里——后者慢、
+需要前提、且失败原因更含糊。
+
+被 `node --test` 直接加载的模块**不能依赖浏览器 / GM API**（`import.meta.env`、`GM_*`、
+`window` 都算）。想加日志就加在调用方，别为了一行 warn 把整个模块从这一半赶到浏览器那一半。
