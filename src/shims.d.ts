@@ -19,11 +19,20 @@ interface UserscriptConfigWithMatches extends UserscriptConfigBase {
   matches: string[]
 }
 interface UserscriptConfigWithIncludes extends UserscriptConfigBase {
-  includes: (string | RegExp)[]
+  includes: IncludePattern[]
 }
 
 interface UserscriptWithMatches extends UserscriptFunction, UserscriptConfigWithMatches {}
 interface UserscriptWithIncludes extends UserscriptFunction, UserscriptConfigWithIncludes {}
+
+/**
+ * `includes` 里能写的东西：RegExp 字面量，或带 `/.../` 定界符的字符串。
+ *
+ * 模板字面量类型挡掉的是裸字符串（`'https://example.com/*'` 这类通配符形式）。
+ * Tampermonkey 对无定界符的形式走**通配符**语义，而运行时按正则编译 —— 两侧语义不一致，
+ * 且偏的方向包括「在本不该注入的宿主上执行」。详见 `helpers/include-pattern.ts`。
+ */
+declare type IncludePattern = RegExp | `/${string}/${string}`
 
 declare type UserscriptConfig = UserscriptConfigWithMatches | UserscriptConfigWithIncludes
 declare type Userscript = UserscriptWithMatches | UserscriptWithIncludes

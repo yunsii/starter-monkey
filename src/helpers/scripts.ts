@@ -1,12 +1,29 @@
 import { matchPattern } from 'browser-extension-url-match'
 
 import { matchesInclude } from './include-pattern'
+import { logger } from './logger'
 import { interopDefault } from './modules'
 
 import type { SettingsSchema } from './settings/types'
 
 export function detectIsUserscriptWithIncludes(userscript: Userscript): userscript is UserscriptWithIncludes {
   return 'includes' in userscript
+}
+
+/**
+ * 模式编译失败时只让**这一个**脚本不命中。
+ *
+ * 异常冒出 `getUserscripts()` 之外的代价大得不成比例：`main.ts` 只有 `.then` 没有 `.catch`，
+ * 于是一条写错的 `includes` 会让所有脚本连配置入口一起不执行，现场只留一条 unhandled
+ * rejection。而 warn 在生产里不静默（见 `helpers/logger.ts`），写错了看得见。
+ */
+function matchesIncludeOrWarn(userscript: UserscriptWithIncludes): boolean {
+  try {
+    return matchesInclude(userscript.includes, window.location.href)
+  } catch (error) {
+    logger.warn(`${userscript.displayName} 的 includes 编译失败，已当作不命中：`, error)
+    return false
+  }
 }
 
 /**
@@ -51,7 +68,7 @@ export async function getUserscripts(): Promise<MatchedUserscript[]> {
     if (isUserscriptWithIncludes) {
       return {
         ...common,
-        matched: matchesInclude(userscript.includes, window.location.href),
+        matched: matchesIncludeOrWarn(userscript),
       }
     } else {
       return {

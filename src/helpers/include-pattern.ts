@@ -20,26 +20,56 @@
  * 「一个都不命中」表现成了「每个注入页面都命中」。两个错误的净效果看起来像能用，
  * 只有把 `.map()` 改成 `.some()` 之后才会露出来：脚本一个页面都不再执行。
  *
- * 所以修 `.some()` 是必要但不充分的，必须连这里一起修。
+ * 这个模块**不依赖任何浏览器 / GM API**，`node --test` 直接加载它。要加日志请加在调用方
+ * （`helpers/scripts.ts`），不要在这里 import `logger` —— 那会把 `import.meta.env` 拖进来。
  */
-export function compileIncludePattern(item: string | RegExp): RegExp {
-  if (item instanceof RegExp) {
-    return item
-  }
 
-  const delimited = /^\/(.+)\/([a-z]*)$/.exec(item)
+/**
+ * `/pattern/flags` 形式。类型上 `IncludePattern` 已经挡掉了裸字符串，这里是运行时的第二道：
+ * 类型能被 `as` 绕过，旧构建产物里也可能留着不合规的值。
+ */
+const DELIMITED_PATTERN = /^\/(.+)\/([a-z]*)$/
 
-  if (delimited) {
-    return new RegExp(delimited[1], delimited[2])
-  }
-
-  // 不带定界符时按裸正则编译。Tampermonkey 在这种形式下走的是**通配符**语义
-  // （`*` 匹配任意串），运行时这一侧没有实现它 —— 两侧语义不一致会以「装上了却不执行」
-  // 的形式出现，很难查。新增 include 一律写成正则字面量或 `/.../` 字符串。
-  return new RegExp(item)
+/**
+ * `g` / `y` 会让 `test()` 推进 `lastIndex`，而 `includes` 是模块级字面量数组、RegExp 实例
+ * 跨调用共享，`getUserscripts()` 又会被调用多次（`main.ts` 一次，之后每次打开设置面板再一次）。
+ * 于是同一个页面第一次命中、第二次不命中：脚本明明执行了，设置面板却显示「当前页面未生效」，
+ * 关掉再开又好了。这两个 flag 对「是否命中」本来也没有意义，直接剥掉。
+ */
+function withoutStatefulFlags(flags: string): string {
+  return flags.replaceAll(/[gy]/g, '')
 }
 
-/** 当前地址是否命中任意一条 `includes`。 */
+export function compileIncludePattern(item: string | RegExp): RegExp {
+  if (item instanceof RegExp) {
+    const flags = withoutStatefulFlags(item.flags)
+    return flags === item.flags ? item : new RegExp(item.source, flags)
+  }
+
+  const delimited = DELIMITED_PATTERN.exec(item)
+
+  // 不带定界符时**不再**按裸正则编译。Tampermonkey 在这种形式下走的是**通配符**语义
+  // （`*` 匹配任意串），按正则读语义会跑偏，而且偏的方向不只是「装上了却不执行」：
+  // `https://example.com/*` 当正则读时 `.` 是任意字符、`/*` 是零或多个斜杠，于是
+  // `https://example.community/x` 也命中。产物是单个 bundle、按所有脚本 pattern 的并集
+  // 注入，所以只要别的脚本把 bundle 带到了那个页面，这条 include 就会在 Tampermonkey
+  // 本来不会注入的宿主上执行 —— 宁可报错，也不要在错的域名上跑。
+  if (!delimited) {
+    throw new Error(
+      `includes 里的字符串必须写成带定界符的 /pattern/flags 形式，收到：${JSON.stringify(item)}\n`
+      + '提示：通配符形式（如 `https://example.com/*`）运行时没有实现，改写成正则字面量或 `/.../` 字符串',
+    )
+  }
+
+  return new RegExp(delimited[1], withoutStatefulFlags(delimited[2]))
+}
+
+/**
+ * 当前地址是否命中任意一条 `includes`。
+ *
+ * 模式非法（定界符缺失、flags 写错）时**抛出**，不静默当成不命中：怎么降级是调用方的事，
+ * `helpers/scripts.ts` 会把它收敛成「这个脚本不命中」并打一条 warn。
+ */
 export function matchesInclude(items: readonly (string | RegExp)[], href: string): boolean {
   return items.some((item) => compileIncludePattern(item).test(href))
 }

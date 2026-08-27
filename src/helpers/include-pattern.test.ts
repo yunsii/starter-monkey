@@ -27,8 +27,18 @@ describe('compileIncludePattern', () => {
     assert.equal(compileIncludePattern('/abc/i').flags, 'i')
   })
 
-  it('不带定界符时按裸正则编译', () => {
-    assert.ok(compileIncludePattern('^https://example\\.com/').test('https://example.com/'))
+  it('剥掉 g / y —— 它们会让同一个实例第二次 test 就不命中', () => {
+    assert.equal(compileIncludePattern(/abc/g).flags, '')
+    assert.equal(compileIncludePattern(/abc/giy).flags, 'i')
+    assert.equal(compileIncludePattern('/abc/gi').flags, 'i')
+  })
+
+  it('不带定界符直接报错，不按裸正则编译', () => {
+    // 通配符形式当正则读会过度匹配（`.` 是任意字符、`/*` 是零或多个斜杠），
+    // 静默按正则编译等于让脚本可能在 Tampermonkey 本不会注入的宿主上执行
+    assert.throws(() => compileIncludePattern('https://example.com/*'), /必须写成带定界符/)
+    assert.throws(() => compileIncludePattern('*://example.com/*'), /必须写成带定界符/)
+    assert.throws(() => compileIncludePattern('^https://example\\.com/'), /必须写成带定界符/)
   })
 })
 
@@ -46,5 +56,18 @@ describe('matchesInclude', () => {
 
   it('空列表不命中——修复前这里返回空数组，被当成真值', () => {
     assert.equal(matchesInclude([], 'https://foo.example.com/'), false)
+  })
+
+  it('同一条字面量反复匹配，结果稳定', () => {
+    // getUserscripts() 会被调用多次（main.ts 一次，之后每次打开设置面板再一次），
+    // 共享的 RegExp 实例带 `g` 时结果会隔次翻转：脚本执行了，面板却显示未生效
+    const stateful = /example\.com/g
+    const results = [1, 2, 3, 4].map(() => matchesInclude([stateful], 'https://example.com/a'))
+    assert.deepEqual(results, [true, true, true, true])
+  })
+
+  it('模式非法时抛出，由调用方决定怎么降级', () => {
+    // flags 写错的形式过得了定界符检查，只有真正编译时才暴露
+    assert.throws(() => matchesInclude(['/foo/bar'], 'https://example.com/'), /Invalid flags/)
   })
 })
