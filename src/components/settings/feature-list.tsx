@@ -1,4 +1,4 @@
-import { Alert, Empty, Switch, Tooltip } from 'antd'
+import { Empty, Switch, Tooltip } from 'antd'
 import { useCallback, useMemo, useSyncExternalStore } from 'react'
 
 import type { MatchedUserscript } from '@/helpers/scripts'
@@ -81,11 +81,18 @@ export default function FeatureList({ scripts }: FeatureListProps) {
       {/*
         功能已经执行完了才关掉它，页面上留下的东西不会自己消失 —— 让用户知道要刷新，
         比让他们盯着一个「关了却还在」的功能自我怀疑要好。
+
+        而既然话说到「要刷新」，就顺手让它能刷：整行可点，右侧不再摆一个写着「刷新」的
+        按钮 —— 动词已经在标题里了。图标是纯装饰（没有自己的 onClick），所以不违反
+        `PanelItem.onClick` 那条「别和交互控件同时用」。
       */}
-      <Alert
-        type='info'
-        showIcon
-        message='开关在页面刷新后生效'
+      <PanelItem
+        title='刷新页面，让开关改动生效'
+        description='已经执行过的功能，页面上渲染出来的东西不会随开关关闭而消失'
+        action={<span className='i-bx--refresh size-4 text-gray-400' />}
+        onClick={() => {
+          window.location.reload()
+        }}
       />
 
       {ordered.map((item) => {
