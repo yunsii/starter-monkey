@@ -211,7 +211,7 @@ pnpm verify remove --id tr_xxxxxxxx
 ## 不需要浏览器的那一半
 
 `pnpm test` 跑 `node --test`（Node 内置，零依赖），目前覆盖元数据改写、`includes` 模式编译、
-快捷键解析、配置存储键这几块纯逻辑。纯逻辑能在这里断言的，就不要放到浏览器循环里——后者慢、
+快捷键解析、配置存储键、CSS 的 rem→px 换算这几块纯逻辑。纯逻辑能在这里断言的，就不要放到浏览器循环里——后者慢、
 需要前提、且失败原因更含糊。
 
 被 `node --test` 直接加载的模块**不能依赖浏览器 / GM API**（`import.meta.env`、`GM_*`、

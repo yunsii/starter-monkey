@@ -53,6 +53,37 @@
 `components/inline-tailwindcss` 走的是同一套机制。注意它会把 Tailwind 内部的 `--tw-*` 变量整体
 重命名成 `--sm-tw-*`（前缀取自 `helpers/namespace.ts`），避免和宿主页面自己的 Tailwind 撞车。
 
+## 宿主页的根字号
+
+**样式里不要留 `rem`。** 有些页面用 rem 缩放方案，把根字号整体改掉（飞书登录页
+`accounts.feishu.cn/open-apis/authen/v1/authorize` 是 `html { font-size: 70px }`），
+而 Tailwind 的间距和字号默认都是 rem —— 注进去的 UI 会整体放大四倍多，且不报任何错。
+
+**shadow root 挡不住这件事**：`rem` 永远相对**文档根元素**解析，与 shadow 边界无关。
+v2ex 上把根字号改成 70px 实测，shadow root 内的裸 rem 一样被放大：
+
+| shadow root 内的探针        | 宿主根字号 16px | 宿主根字号 70px |
+| --------------------------- | --------------- | --------------- |
+| `style="font-size:.875rem"` | 14px            | **61.25px**     |
+| `class="text-sm"`（换算后） | 14px            | 14px            |
+
+所以答案不是加强隔离，而是不用 rem。`scripts/px-utilities.ts` 是个 `enforce: 'post'` 的 vite
+插件，在构建期把生成的 CSS 里的 rem 换算成 px（`--spacing: .25rem` → `4px`、
+`--text-sm: .875rem` → `14px`），`?inline` 给 shadow 的那份和普通 `.css` import 一起换到。
+
+为什么不在 `@theme` 里覆盖 token：Tailwind v4 的字号、圆角、容器宽度散在几十个 token 里，
+漏一个就是漏一个，而且换算是对产物做的，不需要逐个类名改写源码。
+
+两条边界：
+
+- 插件必须排在 `tailwindcss()` **之后**（同为 `enforce: 'post'`，同相位内按数组顺序执行）。
+  排前面只能拿到 `@import 'tailwindcss'` 那一行，一个 rem 都换不到，且不报错。
+- antd 由 cssinjs 在运行时生成的样式不经过构建，换不到。目前无碍 —— 它的 design token
+  本身就是 px。
+
+任意值类名里的 rem（`min-w-[1.5rem]`）**只换声明、不换类名**，否则选择器就选不中了。
+媒体查询里的 rem 换与不换都对：那里的相对单位本来就按初始字号（16px）解析。
+
 ## 弹层组件
 
 组件库的弹层（Popover / Tooltip / Select）默认 portal 到 `document.body`，出了 shadow root 就拿不到
